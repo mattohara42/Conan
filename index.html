@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conan Spike</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #0a1e2e;
+      font-family: 'Courier New', monospace;
+      color: #ecf0f1;
+    }
+    #game-container {
+      background: #0a1e2e;
+      border: 3px solid #ff9f43;
+    }
+    #info {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #95a5a6;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container"></div>
+  <div id="info">
+    <div>Arrow keys to move | Space to jump</div>
+    <div>X to throw boomerang (max 3)</div>
+    <div>R to restart</div>
+    <div style="margin-top: 10px; color: #27ae60;">Green zone = win</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+  <script type="module">
+    import { CONFIG } from './config.js';
+    import { GameScene } from './src/scenes/GameScene.js';
+
+    const gameConfig = {
+      type: Phaser.AUTO,
+      width: CONFIG.width,
+      height: CONFIG.height,
+      backgroundColor: CONFIG.backgroundColor,
+      parent: 'game-container',
+      physics: {
+        default: 'arcade',
+        arcade: {
+          gravity: { y: CONFIG.gravity },
+          debug: false,
+        },
+      },
+      scene: GameScene,
+    };
+
+    const game = new Phaser.Game(gameConfig);
+  </script>
+</body>
+</html>
