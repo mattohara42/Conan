@@ -51,8 +51,9 @@
       type: Phaser.AUTO,
       width: CONFIG.width,
       height: CONFIG.height,
-      backgroundColor: CONFIG.backgroundColor,
+      backgroundColor: CONFIG.palette.background,
       parent: 'game-container',
+      pixelArt: true, // nearest-neighbour scaling so the tiny sprites stay crisp
       physics: {
         default: 'arcade',
         arcade: {
@@ -64,6 +65,7 @@
     };
 
     const game = new Phaser.Game(gameConfig);
+    window.game = game; // debug/tuning handle
   </script>
 </body>
 </html>
