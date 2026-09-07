@@ -1,0 +1,17 @@
+## World scale. The three numbers every piece of art and every room is measured
+## against, kept in one place because they are the numbers most likely to be
+## wrong and they must not drift.
+class_name WorldConfig
+extends Resource
+
+## Hero height in design px against a 640x360 design resolution.
+## ART_DIRECTION.md puts this at around 40 and says so is the number most likely
+## to be wrong. M0 settles it with a grey capsule.
+@export var hero_height: float = 40.0
+## Hero width. Silhouette reads better narrower than half its height.
+@export var hero_width: float = 18.0
+## Grid the rooms are built on.
+@export var tile_size: float = 16.0
+## Floor-to-floor height of one storey. The jump-versus-ladders question is
+## entirely about whether MovementConfig.jump_height clears this.
+@export var tier_height: float = 96.0

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MovementConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://config/movement_config.gd" id="1_movement"]
+
+[resource]
+script = ExtResource("1_movement")
+preset_name = "strong"
+note = "SPEC.md's answer. The jump is strong and steerable, it clears a tier on its own, and a full-speed jump covers about 130 px of gap. Ladders are furniture here, not traversal."
+max_run_speed = 200.0
+ground_accel = 1600.0
+ground_friction = 2400.0
+air_accel = 1200.0
+air_friction = 400.0
+jump_height = 112.0
+time_to_apex = 0.36
+fall_gravity_multiplier = 1.6
+jump_release_damping = 0.4
+max_fall_speed = 700.0
+coyote_time = 0.1
+jump_buffer_time = 0.12
+climb_speed = 90.0

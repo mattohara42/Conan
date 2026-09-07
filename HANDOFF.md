@@ -3,65 +3,69 @@
 > **Rewrite this file, never append.** State snapshot and pointers only. No
 > session narrative, that is what `git log` is for. Keep it under 80 lines.
 
-**Updated:** 2026-09-07 · **Phase:** not started · **Active milestone:** none
+**Updated:** 2026-09-07 · **Phase:** 1, the verb · **Active milestone:** M0
+
+**M0 done-when:** a capsule crosses a grey room, the jump feels good enough that
+you stop noticing it, and every number that decides that lives in one file.
 
 ## Where this is
 
-The doc set is in. **No Godot project yet, and no code of any kind on `main`.**
+**M0 is built and it is not signed off.** The code half is done and verified.
+The done-when is a feel criterion and only Matt can discharge it.
 
-This repo held the first attempt, a Phaser 3 remake that got Level 1 traced from
-the Sharp X1 release, ladders, coyote time, a walk cycle and a working throw, and
-then stopped one board into seven. **That code is deleted from `main` and kept in
-history**: `git log --all -- src/` finds it, `git show <sha>:src/scenes/GameScene.js`
-reads it. `assets/reference/` survives and is worth keeping (`SPEC.md` → *What
-the repo inherits*).
+Godot 4.7.1, GDScript, no addons. `godot --path .` plays the M0 room.
+26 tests and 129 checks pass headless. CI runs them on every push and also boots
+the real build under Xvfb and uploads a screenshot of the room.
+
+Movement carries coyote time, jump buffering, variable height by hold duration
+and air control. Every number is in `config/`: `movement.tres`,
+`movement_ladders.tres`, `world.tres`. No script sets one.
 
 ## Next action
 
-**M0**, in `BUILD_PLAN.md`: Godot 4 project, one grey room, a capsule that runs
-and jumps with coyote time, jump buffering, variable height and air control, and
-every number in `config/movement.tres`.
+**Play it and answer three questions.** Nothing else in M0 is outstanding.
 
-Its done-when is a feel criterion and it cannot be discharged by a test. Play it.
+1. **Does the jump feel good?** If not, change `config/movement.tres` and only
+   that file. If you have to open a script to fix the feel, that is a bug.
+2. **Is 40 px the right hero height?** `[` and `]` cycle 28 / 34 / 40 / 46 / 54
+   against fixed geometry. `ART_DIRECTION.md` calls this the number most likely
+   to be wrong and it should be settled before M5 paints anything.
+3. **Strong jump or weak jump and ladders?** Tab swaps the two presets live. The
+   room is completable either way: the strong preset jumps the tiers, the ladder
+   preset must climb them. `SPEC.md` prefers the strong jump and says decide by
+   feel. If ladders win, `SPEC.md` → *Structure* gets rewritten.
+
+The two presets differ in **jump height only**. Derived gravity is identical, on
+purpose, so the comparison means something. A test enforces it.
 
 ## Blocked on Matt
 
-1. **Rename the repo**, `Conan` to `volta-redux`. GitHub Settings → General →
-   Repository name. There is no API for it, so it is a manual click. GitHub
-   redirects the old URL, so nothing breaks in the meantime and no clone needs
-   fixing.
-2. **The hero's name.** `SPEC.md` → *Name* drops Conan the Barbarian and keeps
-   Volta. Nothing in the plan depends on the character, but the hero needs
-   something to be called before M5 paints him.
-3. **Hero size.** `ART_DIRECTION.md` puts it at roughly 40 design px against a
-   640x360 design resolution. **This is the number most likely to be wrong** and
-   it should be settled with a grey capsule in M0, before any art exists.
+1. **The three questions above.** M0 cannot be closed without them.
+2. **The hero's name.** Needed before M5 paints him, not before.
 
-## The one live design disagreement
+The repo rename is done.
 
-`SPEC.md` → *One thing the first attempt decided differently*. That build made
-the jump deliberately too weak to clear a tier so that **ladders** carried you
-between them. This plan gives you a strong steerable jump instead and keeps the
-precision.
+## Worth knowing before touching the movement code
 
-**Build both in M0 and decide by feel.** If ladders win, `Structure` changes.
+The takeoff speed in `Motion.jump_speed_for` carries a half-frame gravity term.
+It is not a fudge and its **sign depends on the order `player.gd` does things
+in**. A 112 px jump measured 122 px in the running game while the test was
+green, because the test simulated a different integration order. Both are now
+written to the order the player actually uses, and `test_motion.gd` says so.
+This is the `CLAUDE.md` rule about drawing what you measured, paid for once.
 
-## Open questions the docs already carry
+## Deferred, deliberately
 
-Both in `GEMINI_NOTES.md` → *What this project will have to learn on its own*,
-and both are M5 experiments rather than blockers:
-
-- Does the multi-subject sheet trick work for **six poses of the same
-  character**, where the sheet's usual job is to differentiate subjects and here
-  it needs to unify them? Test with a throwaway sheet before anything depends
-  on it.
-- Can the generator hold one character's identity across separate sheets, or does
-  every sheet after the first have to be an attach-and-edit of the first?
+- **A palette check over generated art.** `ColourRules` and `test_palette.gd`
+  cover the colours the code chooses. Extending it to PNGs belongs in M5, when
+  there is a PNG.
+- **One-way platforms**, so ladders can pass through a floor. Not needed while
+  ladders sit flush against the ledge they serve.
 
 ## The two gates worth not walking past
 
-**No art before M5, no level building before M10.** The first attempt is the
-evidence: it spent itself tracing and ripping before the core was decided.
+**No art before M5, no level building before M10.** The first attempt spent
+itself tracing and ripping before the core was decided.
 
 **G1, after M5.** One room, finished, played for an hour. If it is not fun, the
 fault is in `SPEC.md` and that is where the fix goes.
@@ -77,4 +81,5 @@ fault is in `SPEC.md` and that is where the fix goes.
 | getting a picture into the game | `ART.md` |
 | before writing any prompt | `GEMINI_NOTES.md` |
 | how to work in this repo | `CLAUDE.md` |
+| running it, and the test command | `README.md` |
 | the original, 53 screenshots | `assets/reference/` |

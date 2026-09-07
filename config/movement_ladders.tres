@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MovementConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://config/movement_config.gd" id="1_movement"]
+
+[resource]
+script = ExtResource("1_movement")
+preset_name = "ladders"
+note = "The first attempt's answer, restated as tuning. Jump height is 56 px against a 96 px tier, so a tier can only be climbed. time_to_apex is 0.2546 rather than 0.36 so that derived gravity stays at 1728 px/s^2 and jump height is the only variable between the two presets. Everything else is identical to config/movement.tres on purpose: if you change a number here, change it there too or the comparison stops meaning anything."
+max_run_speed = 200.0
+ground_accel = 1600.0
+ground_friction = 2400.0
+air_accel = 1200.0
+air_friction = 400.0
+jump_height = 56.0
+time_to_apex = 0.2546
+fall_gravity_multiplier = 1.6
+jump_release_damping = 0.4
+max_fall_speed = 700.0
+coyote_time = 0.1
+jump_buffer_time = 0.12
+climb_speed = 90.0
