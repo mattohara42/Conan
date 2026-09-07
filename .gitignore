@@ -1,5 +1,10 @@
-node_modules/
+# Godot
+.godot/
+/android/
+/build/
+/export/
+*.translation
+
+# Editor and OS
 .DS_Store
 *.log
-dist/
-build/

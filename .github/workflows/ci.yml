@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+env:
+  GODOT_VERSION: "4.7.1-stable"
+
+jobs:
+  test:
+    name: Headless tests and a screenshot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}
+
+      - name: Install Godot
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot
+          curl -sSL -o /tmp/godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d ~/godot
+          mv ~/godot/Godot_v${GODOT_VERSION}_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+
+      - name: Import the project
+        run: ~/godot/godot --headless --path . --import
+
+      - name: Run the tests
+        run: ~/godot/godot --headless --path . --script res://tests/run_tests.gd
+
+      # An assertion proves the code ran, not that the picture is right. This
+      # step boots the real build and draws a frame, which is how a rendering
+      # regression gets caught by a machine rather than by somebody noticing.
+      - name: Screenshot the room
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb
+          xvfb-run -a ~/godot/godot --path . --resolution 1280x720 \
+            --script res://tools/capture.gd -- \
+            --scene=res://scenes/rooms/room_m0.tscn --out=room_m0.png \
+            --input="move_right:2" --zoom=0.38 --centre=800,180 --overwrite
+
+      - name: Keep the screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: room-m0-screenshot
+          path: room_m0.png

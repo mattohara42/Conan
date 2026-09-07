@@ -1,7 +1,7 @@
 # Volta Redux
 
 A 2D puzzle platformer in Godot 4, reimagining Datasoft's *Conan: Hall of Volta*
-(1984). **Planning stage. There is no code yet.**
+(1984). **M0: the project and how it feels to move.**
 
 ## What it is
 
@@ -40,6 +40,36 @@ first thing to read at the start of a session.
 | `ART.md` | how a picture gets from a prompt into the game |
 | `GEMINI_NOTES.md` | how the image generator behaves |
 | `BACKLOG.md` | what is deliberately not in v1 |
+
+## Running it
+
+Godot 4.7.1, no addons and no build step. Open the project and press play, or:
+
+```
+godot --path . --import                          # once, after a fresh clone
+godot --path .                                   # play the M0 room
+godot --headless --path . --script res://tests/run_tests.gd
+```
+
+The tests are a plain script, not a framework. They find `tests/test_*.gd`, run
+every method named `test_*`, and exit non-zero on a failure.
+
+To take a screenshot from a real running build, which is the only way to check
+anything visual (see `CLAUDE.md`):
+
+```
+xvfb-run -a godot --path . --resolution 1280x720 --script res://tools/capture.gd -- \
+    --scene=res://scenes/rooms/room_m0.tscn --out=room.png --zoom=0.38 --centre=800,180
+```
+
+`--overwrite` is required to replace an existing file.
+
+## Where the numbers live
+
+Every value that decides how the game feels is in `config/`, and nothing in a
+script sets one. `config/movement.tres` and `config/movement_ladders.tres` are
+the two answers to the open jump question in `SPEC.md`, and Tab swaps between
+them while you play. `config/world.tres` holds hero size and tier height.
 
 ## The first attempt
 
