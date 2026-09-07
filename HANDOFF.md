@@ -40,10 +40,10 @@ purpose, so the comparison means something. A test enforces it.
 
 ## Blocked on Matt
 
-1. **Rename the repo**, `Conan` to `volta-redux`. Settings → General. No API for
-   it, and GitHub redirects the old URL so nothing breaks meanwhile.
+1. **The three questions above.** M0 cannot be closed without them.
 2. **The hero's name.** Needed before M5 paints him, not before.
-3. **The three questions above.**
+
+The repo rename is done.
 
 ## Worth knowing before touching the movement code
 
