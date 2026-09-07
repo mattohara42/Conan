@@ -1,89 +1,63 @@
-# Conan: Hall of Volta — browser remake
+# Volta Redux
 
-A browser remake of the 1984 Datasoft platformer *Conan: Hall of Volta*, built
-on Phaser 3 with no build step. It began as a jump-feel spike and now has a
-pixel-traced Level 1, ladder climbing, ripped sprites, and animation.
+A 2D puzzle platformer in Godot 4, reimagining Datasoft's *Conan: Hall of Volta*
+(1984). **Planning stage. There is no code yet.**
 
-The original was punishing because of rigid jump mechanics — no mid-air
-correction, brutal precision. This remake keeps the layout faithful while giving
-the input modern feel (coyote time, horizontal air control) and using ladders
-(not pixel-perfect jumps) to move between tiers.
+## What it is
 
-## Quick start
+The 1984 original is not a good game. Seven one-screen levels solved by
+memorising a fixed sequence, jumps you cannot steer, and hazards that kill on
+contact with no cheap retry. This is not a remake of it, and an earlier attempt
+at one is in this repo's history.
 
-```bash
-python3 serve.py          # dev server on http://localhost:8080 (no-cache)
+**One mechanic in it is worth a whole game.** The boomerang sword flies out,
+turns, and comes back. Catch it and you keep it. Hit a wall or an enemy and it is
+gone. That is a risk and reward economy inside a single button, and this game
+makes it the core verb: throw it, catch it, embed it in wood as a ledge you stand
+on, recall it, and run current through it.
+
+Volta is a unit of electric potential, and the original's boss hazard was already
+an electrical generator gone haywire, so the third act is wiring.
+
+Faithful and hard. Lava kills, spikes kill, no health bar, three swords. The
+modernisation is in the cost of dying rather than the chance of it: under a
+second from death to moving again.
+
+## Where to start
+
+**`SPEC.md`** is the source of truth, and its section *The sword is the game* is
+what everything else hangs off. **`HANDOFF.md`** is the state snapshot and the
+first thing to read at the start of a session.
+
+| file | owns |
+|---|---|
+| `SPEC.md` | what the game is: the verb, the rooms, the enemies |
+| `BUILD_PLAN.md` | M0 to M16 in four phases, each with a done-when |
+| `HANDOFF.md` | where the project is right now, and what is blocked |
+| `CLAUDE.md` | how to work in this repo |
+| `ART_DIRECTION.md` | palette, light, treatment |
+| `ANIMATION.md` | what is rigged, what is painted, and why |
+| `ART.md` | how a picture gets from a prompt into the game |
+| `GEMINI_NOTES.md` | how the image generator behaves |
+| `BACKLOG.md` | what is deliberately not in v1 |
+
+## The first attempt
+
+A Phaser 3 remake, through 2026-08-01. It got Level 1 pixel-traced from the Sharp
+X1 release, ladder climbing, coyote time, a walk cycle and a working sword throw,
+then stopped one board into seven. It is deleted from `main` and kept in history:
+
+```
+git log --all -- src/
+git show <sha>:src/scenes/GameScene.js
 ```
 
-Then open http://localhost:8080. No npm, no build — just Python's stdlib server
-and Phaser 3 from a CDN. `serve.py` disables caching so edits to `config.js` and
-the ES modules show up on a plain reload; `python3 -m http.server 8080` also works
-but caches modules, so you'd need a hard refresh.
+## Credits and references
 
-## Controls
+Original game: *Conan: Hall of Volta*, Datasoft, 1984, designed by Eric Robinson
+and Eric Parker.
 
-| Key | Action |
-|-----|--------|
-| ← → | Move |
-| ↑ ↓ | Climb (while on a ladder) |
-| Space | Jump |
-| X | Throw sword (max 3 in flight; kills enemies on contact) |
-| R | Restart |
-
-Reach the green zone at the top-left to win.
-
-## What's built
-
-- **Level 1**, pixel-traced from the original (Sharp X1 reference): five stacked
-  tiers plus a floor, joined by four ladders, with the exit on the top wall and a
-  landable tree off the right side. Start bottom-right, climb the ladder zigzag up.
-- **Ladder climbing** — gravity off while on a ladder, pass through platforms,
-  up/down to climb, dismount by moving off / jumping / reaching the end.
-- **Conan** — sprite ripped from the Apple II original, 2-frame walk cycle
-  (reused for climbing), flips to face travel direction.
-- **Flying enemy** — the dragonfly drifts horizontally and hovers (gravity off,
-  ignores terrain). Throw a sword to knock it down.
-- **Original palette** — sampled from the C64 release (magenta platforms, green
-  ladders, black background), centralized in `config.palette`.
-
-## Project structure
-
-```
-config.js              # ALL tuning: palette, physics, Level 1 geometry, enemies
-index.html             # entry point (Phaser config inline)
-serve.py               # no-cache dev server
-src/scenes/GameScene.js# the whole game: create() + update() loop
-assets/
-  reference/           # original game screenshots (per platform) used for tracing
-  sprites/             # sprites ripped from the reference, transparent PNGs
-NOTES.md               # running handoff log of fixes and decisions
-BUILD_PLAN.md          # roadmap
-```
-
-## Tuning
-
-Every magic number lives in `config.js`. Common dials:
-
-- `player.jumpPower` (300) — deliberately below a tier's height so ladders matter
-- `player.climbSpeed` (150), `player.jumpCoyoteFrames` (6)
-- `gravity` (800) — higher = snappier fall
-- `enemy.hoverAmp` / `hoverSpeed` / `moveSpeed` — the dragonfly's flight
-- `platforms` / `ladders` / `exit` / `tree` — Level 1 layout
-
-Edit, reload. No build.
-
-## Not done yet
-
-- Only Level 1 (the original has seven boards; references for all are in `assets/reference/`)
-- Object mechanics (gem / key / doors) — sprites are ripped and waiting; they belong to board 2+
-- No audio, no menu/pause, no persistence, no mobile/touch
-- Orange support pillars from Level 1 are not modeled (cosmetic)
-
-## Credits & references
-
-- Original game: *Conan: Hall of Volta* — Datasoft, 1984 (Eric Robinson & Eric Parker)
-- Reference screenshots via [MobyGames](https://www.mobygames.com/game/9293/conan/)
-- Phaser 3.55 — https://phaser.io/docs/3.55.2
-
-The art in `assets/` is from the original game and is included here as reference
-for this non-commercial fan remake; all rights belong to the respective holders.
+`assets/reference/` holds 53 screenshots of the original across four platforms,
+downloaded from [MobyGames](https://www.mobygames.com/game/9293/conan/) as
+research. They are not traced, not ripped from, and not shipped. All rights
+belong to the respective holders.
