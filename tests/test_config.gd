@@ -6,6 +6,7 @@ extends TestCase
 const STRONG := "res://config/movement.tres"
 const LADDERS := "res://config/movement_ladders.tres"
 const WORLD := "res://config/world.tres"
+const SWORD := "res://config/sword.tres"
 
 ## The two presets are a controlled experiment, so everything except the jump
 ## and the time it takes has to be identical between them.
@@ -20,6 +21,7 @@ func test_every_tuning_file_loads() -> void:
 	check(load(STRONG) is MovementConfig, "config/movement.tres is a MovementConfig")
 	check(load(LADDERS) is MovementConfig, "config/movement_ladders.tres is a MovementConfig")
 	check(load(WORLD) is WorldConfig, "config/world.tres is a WorldConfig")
+	check(load(SWORD) is SwordConfig, "config/sword.tres is a SwordConfig")
 
 
 func test_no_tuning_number_is_nonsense() -> void:
@@ -101,3 +103,44 @@ func test_world_scale_holds_together() -> void:
 		is_zero_approx(fmod(world.tier_height, world.tile_size)),
 		"tier height is a whole number of tiles"
 	)
+
+
+## The sword's numbers. SPEC.md makes the sword the game, so the file that
+## decides how it behaves gets held to the claims the design makes about it.
+func test_the_sword_numbers_hold_together() -> void:
+	var sword: SwordConfig = load(SWORD)
+	var world: WorldConfig = load(WORLD)
+	check(sword.speed > 0.0, "it goes somewhere")
+	check(sword.max_range > 0.0, "it has a range")
+	check(
+		sword.max_return_distance > sword.max_range,
+		"the return has more budget than the throw, or standing still would miss"
+	)
+	check(sword.catch_radius > 0.0, "there is a catch window at all")
+	check(
+		sword.catch_radius < world.hero_height * 0.5,
+		"the catch window is smaller than half a hero, or a jump would not miss"
+	)
+	check(sword.pickup_radius > 0.0, "a grounded sword can be walked over")
+	check(sword.fall_gravity > 0.0, "a spent sword falls")
+	check(sword.max_fall_speed > 0.0, "and stops accelerating eventually")
+	check(sword.throw_cooldown > 0.0, "a held button is not an automatic weapon")
+
+
+## SPEC.md: three swords, cap five. Ten was the original's number and it is why
+## no single throw mattered there.
+func test_the_sword_count_is_the_difficulty_dial_and_it_is_small() -> void:
+	var sword: SwordConfig = load(SWORD)
+	check(sword.starting_swords >= 1, "you start with something to throw")
+	check(
+		sword.starting_swords <= sword.max_swords,
+		"you do not start over the cap"
+	)
+	check(sword.max_swords <= 5, "cap five, per SPEC.md")
+
+
+## An embedded sword is a one-tile ledge in M2. If these drift apart, that stops
+## being true and the Act 1 puzzles stop working.
+func test_a_sword_is_one_tile_long() -> void:
+	var world: WorldConfig = load(WORLD)
+	check_eq(world.sword_length, world.tile_size, "sword length is one tile")

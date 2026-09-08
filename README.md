@@ -1,7 +1,7 @@
 # Volta Redux
 
 A 2D puzzle platformer in Godot 4, reimagining Datasoft's *Conan: Hall of Volta*
-(1984). **M0: the project and how it feels to move.**
+(1984). **M1: the sword throws, returns, is caught, and is consumed.**
 
 ## What it is
 
@@ -47,7 +47,7 @@ Godot 4.7.1, no addons and no build step. Open the project and press play, or:
 
 ```
 godot --path . --import                          # once, after a fresh clone
-godot --path .                                   # play the M0 room
+godot --path .                                   # play the benches, F2 cycles
 godot --headless --path . --script res://tests/run_tests.gd
 ```
 
