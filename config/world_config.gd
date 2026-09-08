@@ -12,6 +12,9 @@ extends Resource
 @export var hero_width: float = 18.0
 ## Grid the rooms are built on.
 @export var tile_size: float = 16.0
+## Blade length in design px. One tile, because M2 makes an embedded sword a
+## one-tile ledge you stand on and those two numbers must not drift apart.
+@export var sword_length: float = 16.0
 ## Floor-to-floor height of one storey. The jump-versus-ladders question is
 ## entirely about whether MovementConfig.jump_height clears this.
 @export var tier_height: float = 96.0

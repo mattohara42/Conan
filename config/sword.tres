@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SwordConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://config/sword_config.gd" id="1_sword"]
+
+[resource]
+script = ExtResource("1_sword")
+speed = 420.0
+max_range = 200.0
+max_return_distance = 300.0
+spin_speed = 14.0
+catch_radius = 14.0
+pickup_radius = 16.0
+throw_cooldown = 0.18
+fall_gravity = 900.0
+fall_drag = 600.0
+max_fall_speed = 500.0
+starting_swords = 3
+max_swords = 5

@@ -1,0 +1,18 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/sword.gd" id="1_sword"]
+[ext_resource type="Resource" path="res://config/sword.tres" id="2_config"]
+[ext_resource type="Resource" path="res://config/world.tres" id="3_world"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_blade"]
+size = Vector2(16, 6)
+
+[node name="Sword" type="Area2D"]
+collision_layer = 8
+collision_mask = 1
+script = ExtResource("1_sword")
+config = ExtResource("2_config")
+world = ExtResource("3_world")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_blade")

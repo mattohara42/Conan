@@ -11,12 +11,23 @@ extends CharacterBody2D
 @export var preset_strong: MovementConfig
 @export var preset_ladders: MovementConfig
 @export var world: WorldConfig
+@export var sword_config: SwordConfig
+@export var sword_scene: PackedScene
 
 ## Hero heights to cycle with [ and ], around ART_DIRECTION.md's estimate of 40.
 const HERO_HEIGHT_STEPS: PackedFloat32Array = [28.0, 34.0, 40.0, 46.0, 54.0]
 
 var config: MovementConfig
 var spawn_point := Vector2.ZERO
+
+## Ammunition. SPEC.md: three swords, cap five, and the count is the difficulty
+## dial. A thrown sword is spent the moment it leaves your hand and only comes
+## back if you catch it or walk to it.
+var swords_held := 0
+## Which way a throw goes. Held rather than derived from velocity, or a standing
+## player would have no facing to throw along.
+var facing := 1.0
+var _throw_cooldown := 0.0
 
 # Forgiveness windows, owned here and interpreted by JumpGate.
 var _coyote_timer := 0.0
@@ -41,6 +52,7 @@ func _ready() -> void:
 	add_to_group("player")
 	config = preset_strong
 	spawn_point = global_position
+	swords_held = sword_config.starting_swords
 	_apply_hero_size(world.hero_height)
 	_ladder_probe.area_entered.connect(func(_a: Area2D) -> void: _ladders_touched += 1)
 	_ladder_probe.area_exited.connect(func(_a: Area2D) -> void: _ladders_touched = maxi(_ladders_touched - 1, 0))
@@ -52,6 +64,11 @@ func _physics_process(delta: float) -> void:
 	var on_floor := is_on_floor()
 	var input_dir := Input.get_axis("move_left", "move_right")
 	var climb_dir := Input.get_axis("climb_up", "climb_down")
+	if not is_zero_approx(input_dir):
+		facing = signf(input_dir)
+	_throw_cooldown = maxf(_throw_cooldown - delta, 0.0)
+	if Input.is_action_just_pressed("throw"):
+		_throw()
 
 	_coyote_timer = JumpGate.coyote_next(on_floor, _coyote_timer, config.coyote_time, delta)
 	_buffer_timer = JumpGate.buffer_next(
@@ -107,6 +124,23 @@ func _step_airborne(input_dir: float, climb_dir: float, on_floor: bool, delta: f
 
 	if JumpGate.should_jump(_coyote_timer, _buffer_timer):
 		_jump(delta)
+
+
+## Spends a sword. The count drops now, not when the throw resolves, because
+## the sword is out of your hands either way and the decision has been made.
+func _throw() -> void:
+	if swords_held <= 0 or _throw_cooldown > 0.0 or sword_scene == null:
+		return
+	var sword := sword_scene.instantiate() as Sword
+	get_parent().add_child(sword)
+	sword.launch(self, facing)
+	sword.recovered.connect(_on_sword_recovered)
+	swords_held -= 1
+	_throw_cooldown = sword_config.throw_cooldown
+
+
+func _on_sword_recovered() -> void:
+	swords_held = mini(swords_held + 1, sword_config.max_swords)
 
 
 func _jump(delta: float) -> void:
@@ -179,7 +213,6 @@ func _draw() -> void:
 	draw_circle(Vector2(0.0, top), r, body)
 	draw_circle(Vector2(0.0, bottom), r, body)
 	draw_rect(Rect2(-r, top, r * 2.0, bottom - top), body)
-	var facing := signf(velocity.x) if not is_zero_approx(velocity.x) else 1.0
 	draw_line(
 		Vector2(-facing * r * 0.85, top),
 		Vector2(-facing * r * 0.85, bottom),

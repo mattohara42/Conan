@@ -9,7 +9,7 @@ script = ExtResource("1_overlay")
 offset_left = 6.0
 offset_top = 6.0
 offset_right = 330.0
-offset_bottom = 96.0
+offset_bottom = 106.0
 
 [node name="Margin" type="MarginContainer" parent="Panel"]
 layout_mode = 2
