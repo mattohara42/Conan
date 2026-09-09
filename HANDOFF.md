@@ -19,8 +19,14 @@ moved.
 **Tab was bound to physical keycode 9 instead of `KEY_TAB` (4194306), so the
 preset swap never worked.** Fixed on `main`, and `tests/test_input_map.gd` now
 checks every action against the key the overlay advertises. The other debug keys
-were always fine. Godot reads `project.godot` once at startup, so a pull only
-takes effect after the editor is closed and reopened.
+were always fine.
+
+**Opening the project in Godot rewrites `project.godot`**, stripping its comments
+and dropping settings that sit at their default. That leaves the file dirty, so
+the next `git pull` refuses and any change to the input map silently fails to
+arrive. Close the editor, `git checkout -- project.godot`, then pull. The
+standing fix is to commit Godot's own serialisation of the file and keep the
+explanatory notes somewhere Godot will not delete them.
 
 ## The jump, which is now the thing blocking M2
 
