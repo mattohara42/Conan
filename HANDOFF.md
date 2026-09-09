@@ -3,76 +3,78 @@
 > **Rewrite this file, never append.** State snapshot and pointers only. No
 > session narrative, that is what `git log` is for. Keep it under 80 lines.
 
-**Updated:** 2026-09-08 · **Phase:** 1, the verb · **Active milestone:** M1
+**Updated:** 2026-09-09 · **Phase:** 1, the verb · **Active milestone:** M1
+closing, M2 next
 
-**M1 done-when:** all four sword states work in a grey room, the catch window is
-a tunable number, and a missed catch leaves a sword on the floor you can walk
-over to pick up.
+**M2 done-when:** a grey room that **cannot be finished** without standing on
+your own thrown sword, and a second one that cannot be finished without
+recalling it while it holds a switch down.
 
 ## Where this is
 
-**M1's done-when is met and verified in a running build.** Whether the throw
-*feels* right is a separate question and it needs playing.
+M0 and M1 both meet their done-when in a running build. Matt has Godot installed
+and has played it. **The feel questions are still open**, and one of them just
+moved.
 
-Two benches, F2 cycles between them. `godot --path .` opens the M0 one.
-40 tests, 189 checks. CI runs them and screenshots the game under Xvfb.
+**Tab was bound to physical keycode 9 instead of `KEY_TAB` (4194306), so the
+preset swap never worked.** Fixed, and `tests/test_input_map.gd` now checks every
+action against the key the overlay advertises. The other debug keys were fine.
 
-The sword: `J` throws along your facing, it flies 200 px, turns, and comes back
-along **the height you threw at**, steering only in x toward where you now are.
-Stand there and you catch it. Jump and it passes under you, sails on, and lands
-on the floor with a ring round it to walk to. Hit the pillar and it is gone.
-Three swords, spent on throw, returned on catch or pickup.
+## The jump, which is now the thing blocking M2
 
-`SwordFlight.next_state` is the whole machine in one function, and
-`test_sword_flight.gd` walks every transition.
+Matt played the strong preset (the only one Tab could reach) and read it as too
+high, preferring the first attempt's "more normal" jump. That build's numbers are
+in history at `29fa013:config.js`:
+
+| | height | apex | gravity | vs hero | vs tier |
+|---|---|---|---|---|---|
+| old Phaser build | 56 px | 0.375 s | 800 | 1.76x (32 px hero) | 0.75 (75 px tier) |
+| current, strong | 112 px | 0.360 s | 1728 | 2.80x (40 px hero) | 1.17 (96 px tier) |
+| current, ladders | 56 px | 0.255 s | 1728 | 1.40x (40 px hero) | 0.58 |
+
+**The jump he liked is 56 px, which is the ladders preset's height exactly.** So
+the preference points at `SPEC.md` → *ladders vs jump* being answered against
+what `SPEC.md` currently says. It is not a clean vote yet: the old build was low
+**and floaty** (gravity 800), the ladders preset is low **and snappy** (1728), so
+neither preset reproduces what he remembers. A third preset at 56 px / 0.375 s
+would, and it would break `test_config.gd`'s controlled-experiment assertion,
+which is a deliberate cost and not a bug.
+
+**M2's rooms are the reason this blocks.** A room built to need an embedded-sword
+ledge is sized by jump distance, and 112 px and 56 px are different games.
 
 ## Next action
 
-**Play both benches and answer four questions.** Three are M0's and they are
-still open, because a feel criterion cannot be discharged from a container.
-
-1. **Does the jump feel good?** Change `config/movement.tres` and only that file.
-2. **Is 40 px the right hero height?** `[` and `]` cycle 28 / 34 / 40 / 46 / 54.
-3. **Strong jump, or weak jump and ladders?** Tab swaps the presets live. The M0
-   bench is completable either way. If ladders win, `SPEC.md` → *Structure* gets
-   rewritten.
-4. **Does the throw feel good?** `config/sword.tres`. The numbers most likely to
-   be wrong are `max_range` (200) and `catch_radius` (14).
+1. **Play both presets now that Tab works**, and answer: low or high, floaty or
+   snappy. This is the last M0 question and everything downstream is sized by it.
+2. **Build M2's mechanics** (embed in wood, recall on hold, stand on the sword)
+   which are jump-independent and can start before 1 is answered.
+3. **Build M2's two rooms** only after 1 is answered.
 
 ## Blocked on Matt
 
-1. **The four questions above.** M0 cannot be closed without the first three.
-2. **The repo About panel** still describes the Phaser build. There is no `gh` in
-   the session container, so it needs one `gh repo edit` locally. The composed
-   description and topics are in the session log.
-3. **The hero's name.** Needed before M5 paints him, not before.
+1. **The jump.** See above. Blocks M2's rooms, not M2's mechanics.
+2. **Is 40 px the right hero height?** `[` and `]` cycle 28 / 34 / 40 / 46 / 54.
+   Blocks M5 too, being the hero's pixel height.
+3. **The repo About panel** still describes the Phaser build. Needs one
+   `gh repo edit` locally; there is no `gh` in the session container.
+4. **The hero's name.** Needed before M5 paints him, not before.
 
-## Decisions made in M1, worth not relitigating
+## Distribution
 
-- **You miss by changing height.** The return leg is flat, so the miss is a
-  decision about where you stand rather than a physics accident. This is what
-  makes the floating eyeball ("tracks you slowly, at your height") a real threat
-  to your return line in M4.
-- **A catch beats a solid hit in the same frame.** If the sword got inside your
-  catch radius the throw already worked.
-- **Landing is not the same event as hitting a wall.** Only flight destroys a
-  sword; a spent one lands.
+`BUILD_PLAN.md` → M16 owns it and nothing needs deciding now. The two settings
+that would have been locks are already right: GL Compatibility (the renderer web
+export needs) and a fixed 640x360 viewport.
 
-## Deferred, deliberately
+## Settled in M1, do not relitigate
 
-- **A palette check over generated art.** `ColourRules` covers the colours the
-  code chooses. Extending it to PNGs belongs in M5, when there is a PNG.
-- **One-way platforms**, so ladders can pass through a floor. Not needed while
-  ladders sit flush against the ledge they serve.
-- **A real HUD for the sword count.** It is in the debug overlay. M16 owns UI.
+You miss by changing height, a catch beats a solid hit in the same frame, and
+only flight destroys a sword (a spent one lands).
 
-## The two gates worth not walking past
+## The gates
 
-**No art before M5, no level building before M10.** The first attempt spent
-itself tracing and ripping before the core was decided.
-
-**G1, after M5.** One room, finished, played for an hour. If it is not fun, the
-fault is in `SPEC.md` and that is where the fix goes.
+No art before M5, no level building before M10, and G1 after M5.
+`BUILD_PLAN.md` carries the reasoning and it has not changed.
 
 ## Pointers
 
