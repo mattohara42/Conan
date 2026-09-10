@@ -17,8 +17,16 @@ and has played it. **The feel questions are still open**, and one of them just
 moved.
 
 **Tab was bound to physical keycode 9 instead of `KEY_TAB` (4194306), so the
-preset swap never worked.** Fixed, and `tests/test_input_map.gd` now checks every
-action against the key the overlay advertises. The other debug keys were fine.
+preset swap never worked.** Fixed on `main`, and `tests/test_input_map.gd` now
+checks every action against the key the overlay advertises. The other debug keys
+were always fine.
+
+**Opening the project in Godot rewrites `project.godot`**, stripping its comments
+and dropping settings that sit at their default. That leaves the file dirty, so
+the next `git pull` refuses and any change to the input map silently fails to
+arrive. Close the editor, `git checkout -- project.godot`, then pull. The
+standing fix is to commit Godot's own serialisation of the file and keep the
+explanatory notes somewhere Godot will not delete them.
 
 ## The jump, which is now the thing blocking M2
 
@@ -56,9 +64,7 @@ ledge is sized by jump distance, and 112 px and 56 px are different games.
 1. **The jump.** See above. Blocks M2's rooms, not M2's mechanics.
 2. **Is 40 px the right hero height?** `[` and `]` cycle 28 / 34 / 40 / 46 / 54.
    Blocks M5 too, being the hero's pixel height.
-3. **The repo About panel** still describes the Phaser build. Needs one
-   `gh repo edit` locally; there is no `gh` in the session container.
-4. **The hero's name.** Needed before M5 paints him, not before.
+3. **The hero's name.** Needed before M5 paints him, not before.
 
 ## Distribution
 
