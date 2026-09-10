@@ -149,6 +149,7 @@ class CaptureAgent:
 		if player != null:
 			print("capture: player at %s, peak %.1f px" % [player.global_position, player.peak_height])
 		_report_swords()
+		_report_mechanisms()
 
 		await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()
@@ -177,6 +178,27 @@ class CaptureAgent:
 			if sword != null:
 				print("capture: sword %s at %s" % [
 					SwordFlight.state_name(sword.state), sword.global_position
+				])
+
+
+	## Whether the switches are held and the gates are open.
+	##
+	## A sword's position can be checked with arithmetic. Whether a switch
+	## actually sensed it, and whether the gate that switch is wired to actually
+	## opened, cannot: that is an Area2D overlap and a signal, and the only
+	## honest way to know is to run it and look.
+	func _report_mechanisms() -> void:
+		for node in get_tree().get_nodes_in_group("switches"):
+			var switch := node as SwordSwitch
+			if switch != null:
+				print("capture: switch at %s %s" % [
+					switch.global_position, "HELD" if switch.is_held else "free"
+				])
+		for node in get_tree().get_nodes_in_group("gates"):
+			var gate := node as Gate
+			if gate != null:
+				print("capture: gate at %s %s" % [
+					gate.global_position, "OPEN" if gate.is_open else "shut"
 				])
 
 

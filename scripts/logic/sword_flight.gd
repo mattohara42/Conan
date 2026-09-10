@@ -167,6 +167,16 @@ static func embed_position(surface_x: float, direction: float, length: float) ->
 	return surface_x - signf(direction) * length * 0.5
 
 
+## Whether a sword in this state is holding a switch down.
+##
+## Only an embedded one. A sword flying through a switch does not trip it, and
+## one lying on the floor across it does not hold it, because the switch is
+## weight in a socket rather than a tripwire. Stated here rather than inside the
+## switch so that the rule is one line in the machine that owns sword state.
+static func holds_a_switch(state: State) -> bool:
+	return state == State.EMBEDDED
+
+
 ## Hold-to-recall, per SPEC.md. The throw leaves on the press so that throwing
 ## never feels laggy, and the recall fires later on the same button, once it has
 ## been held longer than any tap could last. `already_fired` keeps one hold from

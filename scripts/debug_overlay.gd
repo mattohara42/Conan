@@ -16,6 +16,7 @@ const BENCHES: PackedStringArray = [
 	"res://scenes/rooms/room_m1.tscn",
 	"res://scenes/rooms/room_m2.tscn",
 	"res://scenes/rooms/room_m2_gap.tscn",
+	"res://scenes/rooms/room_m2_switch.tscn",
 ]
 
 @onready var _panel: PanelContainer = $Panel

@@ -7,7 +7,9 @@
 
 **M2 done-when:** a grey room that **cannot be finished** without standing on
 your own thrown sword, and a second one that cannot be finished without
-recalling it while it holds a switch down.
+recalling it while it holds a switch down. **Both are built.** M2 closes when
+they have been played, since a room being possible and a room being good are
+different claims and only one of them is asserted.
 
 ## Where this is
 
@@ -18,6 +20,12 @@ bench (F2 cycles to it) demonstrates all four behaviours and gates nothing.
 The sword embeds in wood, holds a one-tile ledge you stand on, and comes home
 when the throw button is held past `recall_hold_time`. Wood is a group, not a
 layer. `SwordFlight` carries two more states and a `Contact` enum.
+
+**Rooms assert their own claim, not their geometry.** `test_room_m2_gap.gd` and
+`test_room_m2_switch.gd` check "cannot be finished without the sword" against
+`config/`, via `Motion.jump_reach`. Retune the jump in M14 and those files name
+the rooms that broke. That is the difference between a tuning pass and a
+rebuild, and it is only possible because every such number lives in `config/`.
 
 **Four geometry bugs in M2, none of which a test caught**, and all found either
 by arithmetic on paper or by a number out of a running build. The last one was
@@ -51,10 +59,11 @@ traversal is climbing may have traded away the fun of moving.
 
 ## Next action
 
-1. **Build M2's two rooms**, now sized against a 56 px jump. That finishes M2.
-   Needs a switch and a gate, which do not exist yet.
-2. **Play the M2 bench** for feel: does standing on a thrown sword feel good,
-   and does holding J to recall read as one verb or two?
+1. **Play M2's two rooms** (F2 cycles to them). They are proved possible, not
+   proved good. The switch room hands you one sword on purpose.
+2. **Feel questions**: does standing on a thrown sword feel good, and does
+   holding J to recall read as one verb or two?
+3. **M3, hazards and the death loop**, once M2 is closed.
 
 ## Blocked on Matt
 
