@@ -97,22 +97,33 @@ cap at five. Ten was too many to make any single throw matter.
 | Somersault as decoration | Somersault as **a state with different physics** | See `ANIMATION.md`. A move that looks different should behave differently |
 | Avian ally appears in the last scene | Caged and **visible from Act 1** | The ending lands if you have been walking past it for an hour |
 
-### One thing the first attempt decided differently, and it is still open
+### The one thing the first attempt decided differently, and it was right
 
 That build set `jumpPower` **deliberately below a tier's height so that ladders
-mattered**, and moved you between tiers by climbing rather than by jumping. It
-is a real answer to the original's unreliable jump: if precision jumping is the
-problem, remove precision jumping.
+mattered**, and moved you between tiers by climbing rather than by jumping.
 
-**This plan takes the opposite line.** The jump gets strong and steerable, and
-the precision stays, because a platformer whose traversal is ladders has traded
-away the thing that makes moving fun. A weak jump also fights the sword: half of
-what makes an embedded sword interesting is that it extends a jump you could
-almost make.
+**This plan argued the opposite and lost.** Both were built in M0 and both were
+played, and the short jump is the better game. So: **a storey is climbed, never
+jumped.** The jump is 56 px against a 96 px tier and it is for gaps, short steps
+and reaching a sword you put somewhere. `config/movement.tres` holds those
+numbers; `config/movement_strong.tres` keeps the alternative, and Tab still
+swaps them live because M14 retunes everything.
 
-**Settle this by feel in M0, not by argument now.** Build both. If ladders are
-better, the level plans in `Structure` change and this section gets rewritten.
-Ladders are worth keeping as furniture either way.
+The argument against was that a platformer whose traversal is ladders has traded
+away the thing that makes moving fun. That risk is real and it is now the thing
+to watch for at G1.
+
+**What it buys is the sword.** The old argument here said a weak jump fights the
+sword, because half of what makes an embedded sword interesting is that it
+extends a jump you could almost make. That was backwards. With a jump that
+cannot reach the next storey, an embedded sword stops being a small extension
+and becomes **one of the two ways to gain height at all**, the other being a
+ladder somebody else put there. In a game whose thesis is that the sword is the
+game, the weak jump is what makes the thesis true in the level geometry rather
+than only in the combat.
+
+Ladders are traversal now rather than furniture, and every room plan in
+`Structure` is read with that in mind.
 
 
 ## Difficulty
@@ -151,6 +162,11 @@ generator is the act boss and the fight is a circuit, not a damage race.
 **Act 4: the Hall of Volta** (3 rooms). Three gems, three holders, kept from the
 original because it is a good ending. Volta himself, then the cage opens and the
 bird finishes it exactly as it did in 1984.
+
+**Vertical movement is climbing and swords.** A 56 px jump crosses gaps and
+steps, and a storey needs a ladder or a sword you embedded in something. A room
+that has neither is a room you cannot leave upward, and that is a puzzle rather
+than an oversight.
 
 **Gems and keys survive**, but they change meaning. A gem sits behind a distinct
 use of the sword rather than behind a memorised route, and the key is the exit.

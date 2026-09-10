@@ -6,10 +6,11 @@
 class_name Player
 extends CharacterBody2D
 
-## The two answers to the jump-versus-ladders question in SPEC.md. Swap between
-## them live with Tab and decide by feel, which is the only way it can be decided.
+## The game's movement, and the alternative it beat. M0 settled the
+## jump-versus-ladders question in SPEC.md by feel: a storey is climbed, not
+## jumped. Tab still swaps them live, which M14 will want.
+@export var preset_climb: MovementConfig
 @export var preset_strong: MovementConfig
-@export var preset_ladders: MovementConfig
 @export var world: WorldConfig
 @export var sword_config: SwordConfig
 @export var sword_scene: PackedScene
@@ -54,7 +55,7 @@ var _takeoff_y := 0.0
 
 func _ready() -> void:
 	add_to_group("player")
-	config = preset_strong
+	config = preset_climb
 	spawn_point = global_position
 	swords_held = sword_config.starting_swords
 	_apply_hero_size(world.hero_height)
@@ -204,7 +205,7 @@ func _apply_hero_size(height: float) -> void:
 
 func _handle_debug_keys() -> void:
 	if Input.is_action_just_pressed("debug_next_preset"):
-		config = preset_ladders if config == preset_strong else preset_strong
+		config = preset_strong if config == preset_climb else preset_climb
 	if Input.is_action_just_pressed("debug_respawn"):
 		global_position = spawn_point
 		velocity = Vector2.ZERO

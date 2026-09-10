@@ -3,8 +3,8 @@
 ## sense.
 extends TestCase
 
-const STRONG := "res://config/movement.tres"
-const LADDERS := "res://config/movement_ladders.tres"
+const CLIMB := "res://config/movement.tres"
+const STRONG := "res://config/movement_strong.tres"
 const WORLD := "res://config/world.tres"
 const SWORD := "res://config/sword.tres"
 
@@ -18,14 +18,14 @@ const SHARED_PROPERTIES: PackedStringArray = [
 
 
 func test_every_tuning_file_loads() -> void:
-	check(load(STRONG) is MovementConfig, "config/movement.tres is a MovementConfig")
-	check(load(LADDERS) is MovementConfig, "config/movement_ladders.tres is a MovementConfig")
+	check(load(CLIMB) is MovementConfig, "config/movement.tres is a MovementConfig")
+	check(load(STRONG) is MovementConfig, "config/movement_strong.tres is a MovementConfig")
 	check(load(WORLD) is WorldConfig, "config/world.tres is a WorldConfig")
 	check(load(SWORD) is SwordConfig, "config/sword.tres is a SwordConfig")
 
 
 func test_no_tuning_number_is_nonsense() -> void:
-	var presets: PackedStringArray = [STRONG, LADDERS]
+	var presets: PackedStringArray = [CLIMB, STRONG]
 	for path in presets:
 		var config: MovementConfig = load(path)
 		var name := path.get_file()
@@ -56,33 +56,33 @@ func test_no_tuning_number_is_nonsense() -> void:
 func test_the_two_presets_sit_on_opposite_sides_of_a_tier() -> void:
 	var world: WorldConfig = load(WORLD)
 	var strong: MovementConfig = load(STRONG)
-	var ladders: MovementConfig = load(LADDERS)
+	var climb: MovementConfig = load(CLIMB)
 	check(
 		strong.jump_height > world.tier_height,
 		"the strong preset clears a tier without a ladder"
 	)
 	check(
-		ladders.jump_height < world.tier_height,
-		"the ladder preset cannot clear a tier, which is the point of it"
+		climb.jump_height < world.tier_height,
+		"the game's jump cannot clear a tier, which is the whole point of it"
 	)
 
 
 ## Gravity is the same in both, so jump height is the only variable and the
-## comparison means something. See the note in config/movement_ladders.tres.
+## comparison means something. See the note in config/movement.tres.
 func test_the_two_presets_share_a_gravity() -> void:
 	var strong: MovementConfig = load(STRONG)
-	var ladders: MovementConfig = load(LADDERS)
+	var climb: MovementConfig = load(CLIMB)
 	var g_strong := Motion.gravity_for(strong.jump_height, strong.time_to_apex)
-	var g_ladders := Motion.gravity_for(ladders.jump_height, ladders.time_to_apex)
-	check_near(g_ladders, g_strong, g_strong * 0.01, "derived gravity matches within 1 percent")
+	var g_climb := Motion.gravity_for(climb.jump_height, climb.time_to_apex)
+	check_near(g_climb, g_strong, g_strong * 0.01, "derived gravity matches within 1 percent")
 
 
 func test_the_two_presets_differ_in_nothing_else() -> void:
 	var strong: MovementConfig = load(STRONG)
-	var ladders: MovementConfig = load(LADDERS)
+	var climb: MovementConfig = load(CLIMB)
 	for property in SHARED_PROPERTIES:
 		check_eq(
-			ladders.get(property), strong.get(property),
+			climb.get(property), strong.get(property),
 			"%s is shared between the presets" % property
 		)
 

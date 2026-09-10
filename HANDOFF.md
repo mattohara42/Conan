@@ -3,7 +3,7 @@
 > **Rewrite this file, never append.** State snapshot and pointers only. No
 > session narrative, that is what `git log` is for. Keep it under 80 lines.
 
-**Updated:** 2026-09-10 · **Phase:** 1, the verb · **Active milestone:** M2
+**Updated:** 2026-09-11 · **Phase:** 1, the verb · **Active milestone:** M2
 
 **M2 done-when:** a grey room that **cannot be finished** without standing on
 your own thrown sword, and a second one that cannot be finished without
@@ -35,45 +35,38 @@ Close the editor, `git checkout -- project.godot`, then pull. Standing fix: comm
 Godot's own serialisation of that file and keep the notes somewhere it cannot
 delete them. Worth doing, since M3 adds actions too.
 
-## The jump, which is now the thing blocking M2
+## The jump is settled: ladders won
 
-Matt read the strong preset as too high and preferred the first attempt's "more
-normal" jump. That build's numbers, from `29fa013:config.js`:
+Both presets were played and the 56 px one is the better game. **A storey is
+climbed, never jumped.** `config/movement.tres` now holds those numbers and
+`config/movement_strong.tres` keeps the alternative for Tab and for M14.
 
-| | height | apex | gravity | vs hero | vs tier |
-|---|---|---|---|---|---|
-| old Phaser build | 56 px | 0.375 s | 800 | 1.76x (32 px hero) | 0.75 (75 px tier) |
-| current, strong | 112 px | 0.360 s | 1728 | 2.80x (40 px hero) | 1.17 (96 px tier) |
-| current, ladders | 56 px | 0.255 s | 1728 | 1.40x (40 px hero) | 0.58 |
+`SPEC.md` said this section would be rewritten if ladders won, and it has been.
+The reason it went that way is worth keeping: with a jump that cannot reach the
+next storey, an embedded sword is one of only two ways to gain height at all.
+That makes the sword the game in the level geometry and not only in the combat.
 
-**The jump he liked is 56 px, the ladders preset's height exactly**, so the
-preference points against what `SPEC.md` currently argues. Not a clean vote: the
-old build was low **and floaty** (gravity 800), the ladders preset low **and
-snappy** (1728), so neither reproduces it. A third preset at 56 px / 0.375 s
-would, at the cost of `test_config.gd`'s controlled-experiment assertion.
-
-**M2's rooms are sized by this.** 112 px and 56 px are different games.
+**The risk `SPEC.md` named is now the thing to watch at G1**: a platformer whose
+traversal is climbing may have traded away the fun of moving.
 
 ## Next action
 
-1. **Play both presets now that Tab works**, and answer: low or high, floaty or
-   snappy. This is the last M0 question and everything downstream is sized by it.
-2. **Play the M2 bench.** Does standing on a thrown sword feel good, and does
-   holding J to recall feel like one verb or two?
-3. **Build M2's two rooms** once 1 is answered. Only then is M2 done.
+1. **Build M2's two rooms**, now sized against a 56 px jump. That finishes M2.
+   Needs a switch and a gate, which do not exist yet.
+2. **Play the M2 bench** for feel: does standing on a thrown sword feel good,
+   and does holding J to recall read as one verb or two?
 
 ## Blocked on Matt
 
-1. **The jump.** See above. Blocks M2's rooms, not M2's mechanics.
-2. **Is 40 px the right hero height?** `[` and `]` cycle 28 / 34 / 40 / 46 / 54.
+1. **Is 40 px the right hero height?** `[` and `]` cycle 28 / 34 / 40 / 46 / 54.
    Blocks M5 too, being the hero's pixel height.
-3. **A sword ledge is 16 px and the hero is 18 px wide.** You can stand on it,
+2. **A sword ledge is 16 px and the hero is 18 px wide.** You can stand on it,
    because a body needs only its centre supported, but there is no margin. First
    number to look at if standing on a sword feels fiddly.
-4. **Wood's colour.** `ART_DIRECTION.md` says deep darks are warm umber in wood
+3. **Wood's colour.** `ART_DIRECTION.md` says deep darks are warm umber in wood
    and also that anything you stand on is cold and matte. M2 wood is both. Read
    as warm in hue, matte in saturation. Two constants in `Palette` to change.
-5. **The hero's name.** Needed before M5 paints him, not before.
+4. **The hero's name.** Needed before M5 paints him, not before.
 
 ## Distribution
 
