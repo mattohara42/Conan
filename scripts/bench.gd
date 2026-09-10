@@ -19,9 +19,10 @@ const LADDER_OVERSHOOT: float = 28.0
 
 var _solids: Array[Rect2] = []
 var _ladders: Array[Rect2] = []
+var _woods: Array[Rect2] = []
 
 
-func _add_solid(rect: Rect2) -> void:
+func _add_solid(rect: Rect2) -> StaticBody2D:
 	_solids.append(rect)
 	var body := StaticBody2D.new()
 	var shape := CollisionShape2D.new()
@@ -31,6 +32,17 @@ func _add_solid(rect: Rect2) -> void:
 	body.position = rect.get_center()
 	body.add_child(shape)
 	add_child(body)
+	return body
+
+
+## Solid like anything else, and in the "wood" group so a sword can tell. Wood
+## is not its own physics layer: it is ordinary geometry that happens to bite,
+## and a layer would mean every room declaring it solid twice.
+func _add_wood(rect: Rect2) -> void:
+	_add_solid(rect).add_to_group("wood")
+	# Drawn as wood rather than stone, so it comes back out of the stone list.
+	_solids.remove_at(_solids.size() - 1)
+	_woods.append(rect)
 
 
 ## `top` is the surface the ladder serves; it is drawn reaching above that.
@@ -79,6 +91,28 @@ func _draw_bench(width: float) -> void:
 	for rect in _solids:
 		draw_rect(rect, Palette.STONE_MID)
 		draw_rect(Rect2(rect.position, Vector2(rect.size.x, 3.0)), Palette.STONE_LIT)
+	for rect in _woods:
+		draw_rect(rect, Palette.WOOD_DEEP)
+		draw_rect(Rect2(rect.position, Vector2(rect.size.x, 3.0)), Palette.WOOD_FACE)
+		# Grain, so wood reads as wood at 40 px and not as brown stone. Vertical
+		# on a plank taller than it is wide, horizontal otherwise.
+		var along_y := rect.size.y > rect.size.x
+		var span := rect.size.x if along_y else rect.size.y
+		var count := int(span / 9.0)
+		for i in range(1, count):
+			var t := float(i) / float(count)
+			if along_y:
+				var x := rect.position.x + rect.size.x * t
+				draw_line(
+					Vector2(x, rect.position.y), Vector2(x, rect.end.y),
+					Palette.WOOD_FACE, 1.0
+				)
+			else:
+				var y := rect.position.y + rect.size.y * t
+				draw_line(
+					Vector2(rect.position.x, y), Vector2(rect.end.x, y),
+					Palette.WOOD_FACE, 1.0
+				)
 	for rect in _ladders:
 		# Cold and matte, with gold rungs. ART_DIRECTION.md reserves warm and
 		# saturated for things that kill you, and a ladder is the opposite of

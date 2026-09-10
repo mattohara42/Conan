@@ -18,10 +18,17 @@
 ## is still held after the last phase stays held, which is what `--until-apex`
 ## needs to measure a running jump.
 ##
+## A phase named `-` holds nothing, which is how you wait for something the game
+## is doing on its own: "move_left:10;throw:6;-:45" faces left, throws, and then
+## lets go while the sword flies. Letting go matters, because an action held too
+## long is a different action: a held throw is a recall.
+##
 ## Writing over an existing file is the flag, not the default.
 extends SceneTree
 
 const SETTLE_FRAMES := 12
+## The phase name that means "hold nothing".
+const NOTHING_HELD := "-"
 
 var _scene_path := ""
 var _out_path := ""
@@ -84,8 +91,12 @@ func _parse_phases(text: String) -> Array[Dictionary]:
 		if parts.size() != 2:
 			printerr("capture: cannot read input phase \"%s\"" % chunk)
 			continue
+		# `-` is the empty controller, not an action called "-".
+		var actions := PackedStringArray()
+		if parts[0] != NOTHING_HELD:
+			actions = parts[0].split(",", false)
 		phases.append({
-			"actions": parts[0].split(",", false),
+			"actions": actions,
 			"frames": parts[1].to_int(),
 		})
 	return phases
@@ -137,6 +148,7 @@ class CaptureAgent:
 
 		if player != null:
 			print("capture: player at %s, peak %.1f px" % [player.global_position, player.peak_height])
+		_report_swords()
 
 		await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()
@@ -148,6 +160,25 @@ class CaptureAgent:
 			return
 		print("capture: wrote %s at %dx%d" % [_out_path, image.get_width(), image.get_height()])
 		get_tree().quit(0)
+
+	## What every sword ended up doing, and where.
+	##
+	## The picture is the point of this tool, but a picture has to be looked at
+	## by somebody, and CI runs when nobody is. These lines put the same facts
+	## in the log: a throw that never embedded, or a ledge at the wrong x, is a
+	## number here as well as a shape in the PNG.
+	func _report_swords() -> void:
+		var swords := get_tree().get_nodes_in_group("swords")
+		if swords.is_empty():
+			print("capture: no swords in play")
+			return
+		for node in swords:
+			var sword := node as Sword
+			if sword != null:
+				print("capture: sword %s at %s" % [
+					SwordFlight.state_name(sword.state), sword.global_position
+				])
+
 
 	## Presses what this phase wants and releases what it does not, so a phase
 	## describes a state of the controller rather than a set of key presses.

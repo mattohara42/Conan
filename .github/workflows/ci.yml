@@ -50,8 +50,21 @@ jobs:
             --scene=res://scenes/rooms/room_m0.tscn --out=room_m0.png \
             --input="move_right:2" --zoom=0.38 --centre=800,180 --overwrite
 
-      - name: Keep the screenshot
+      # The M2 ledge is a position, and CLAUDE.md says draw a position before
+      # believing it. This throws a sword into wood and photographs where the
+      # ledge actually landed, which no assertion in the suite can do.
+      - name: Screenshot an embedded sword
+        run: |
+          xvfb-run -a ~/godot/godot --path . --resolution 1280x720 \
+            --script res://tools/capture.gd -- \
+            --scene=res://scenes/rooms/room_m2.tscn --out=room_m2_embed.png \
+            --input="move_left:10;throw:6;-:45" --zoom=0.5 --centre=250,240 \
+            --overwrite
+
+      - name: Keep the screenshots
         uses: actions/upload-artifact@v4
         with:
-          name: room-m0-screenshot
-          path: room_m0.png
+          name: screenshots
+          path: |
+            room_m0.png
+            room_m2_embed.png

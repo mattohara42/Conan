@@ -28,6 +28,10 @@ var swords_held := 0
 ## player would have no facing to throw along.
 var facing := 1.0
 var _throw_cooldown := 0.0
+## How long the throw button has been down. SPEC.md puts recall on a hold of the
+## same button, so this is what separates the two.
+var _throw_held := 0.0
+var _recall_fired := false
 
 # Forgiveness windows, owned here and interpreted by JumpGate.
 var _coyote_timer := 0.0
@@ -67,8 +71,7 @@ func _physics_process(delta: float) -> void:
 	if not is_zero_approx(input_dir):
 		facing = signf(input_dir)
 	_throw_cooldown = maxf(_throw_cooldown - delta, 0.0)
-	if Input.is_action_just_pressed("throw"):
-		_throw()
+	_step_throw_button(delta)
 
 	_coyote_timer = JumpGate.coyote_next(on_floor, _coyote_timer, config.coyote_time, delta)
 	_buffer_timer = JumpGate.buffer_next(
@@ -124,6 +127,32 @@ func _step_airborne(input_dir: float, climb_dir: float, on_floor: bool, delta: f
 
 	if JumpGate.should_jump(_coyote_timer, _buffer_timer):
 		_jump(delta)
+
+
+## One button, two verbs. The throw goes out on the press so it never feels
+## laggy, and the recall fires later in the same hold, once the button has been
+## down longer than any tap. Holding therefore throws and then calls everything
+## home, which is what you want when you are out of swords and standing on one.
+func _step_throw_button(delta: float) -> void:
+	if not Input.is_action_pressed("throw"):
+		_throw_held = 0.0
+		_recall_fired = false
+		return
+	if Input.is_action_just_pressed("throw"):
+		_throw()
+	_throw_held += delta
+	if SwordFlight.recall_triggered(_throw_held, sword_config.recall_hold_time, _recall_fired):
+		_recall_fired = true
+		_recall_embedded()
+
+
+## Shouts at every sword on screen. Only the embedded ones answer, which keeps
+## the decision about which sword comes back inside the machine that owns it.
+func _recall_embedded() -> void:
+	for node in get_tree().get_nodes_in_group("swords"):
+		var sword := node as Sword
+		if sword != null:
+			sword.recall()
 
 
 ## Spends a sword. The count drops now, not when the throw resolves, because

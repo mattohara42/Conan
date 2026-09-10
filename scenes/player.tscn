@@ -16,7 +16,7 @@ size = Vector2(9, 32)
 
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 4
-collision_mask = 1
+collision_mask = 17
 script = ExtResource("1_player")
 preset_strong = ExtResource("2_strong")
 preset_ladders = ExtResource("3_ladders")

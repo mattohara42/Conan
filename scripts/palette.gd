@@ -26,6 +26,14 @@ const ARC := Color("5fe0e8")
 const ARC_CORE := Color("eafcff")
 const ARC_RESIDUE := Color("2a6f8a")
 
+# Wood. ART_DIRECTION.md calls wood warm umber, and also says anything you can
+# stand on is cold and matte. Wood is both: it is the surface a sword bites and
+# then a ledge you stand on. Resolved as warm in hue and matte in saturation,
+# so it reads as "not stone" without ever reading as "on fire". Its saturation
+# sits at about half of lava's on purpose.
+const WOOD_DEEP := Color("4a3626")
+const WOOD_FACE := Color("7a5c3e")
+
 # Gold means interactive and nothing else gets to use it.
 const GOLD_FACE := Color("e8c25a")
 const GOLD_SHADE := Color("a37c26")
@@ -50,6 +58,8 @@ static func all() -> Dictionary:
 		"ARC": ARC,
 		"ARC_CORE": ARC_CORE,
 		"ARC_RESIDUE": ARC_RESIDUE,
+		"WOOD_DEEP": WOOD_DEEP,
+		"WOOD_FACE": WOOD_FACE,
 		"GOLD_FACE": GOLD_FACE,
 		"GOLD_SHADE": GOLD_SHADE,
 		"BACKDROP": BACKDROP,
