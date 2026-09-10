@@ -150,22 +150,21 @@ static func recall_velocity(sword_position: Vector2, target: Vector2, speed: flo
 	return offset.normalized() * speed
 
 
-## Where a sword ends up when it bites wood.
+## Where a sword ends up when it bites wood: exactly half a blade clear of the
+## surface, so the whole one-tile ledge is outside the plank.
 ##
-## It is pulled **back** out of the wood, not pushed in, and that is the whole
-## point of this function. The ledge is one tile centred on the sword, so a
-## sword sitting on the surface would put half its ledge inside the plank, and
-## the player's capsule is wider than the half that was left. A ledge you cannot
-## stand on is not a ledge.
-##
-## A quarter length back covers the frame of overshoot between the overlap
-## happening and it being reported, which at throw speed is a handful of px.
-## The tip still reads as bitten in at game size.
+## Takes the **surface**, not the sword. An earlier version guessed from the
+## sword's own position on the frame the overlap was reported, on the theory
+## that it would be about a half-length short of the surface. It is not. A
+## captured throw put the sword 12 px inside the plank, which left 7.9 px of
+## standable ledge against an 18 px player: the wall pushed the player straight
+## off the end of it. Measuring the surface instead makes the answer exact and
+## independent of speed and of when the physics engine gets round to telling us.
 ##
 ## The ledge is one tile and `WorldConfig.sword_length` is one tile. Those two
 ## numbers are tied together on purpose and the comment in that file says so.
-static func embed_position(contact_position: Vector2, direction: float, length: float) -> Vector2:
-	return contact_position - Vector2(signf(direction) * length * 0.25, 0.0)
+static func embed_position(surface_x: float, direction: float, length: float) -> float:
+	return surface_x - signf(direction) * length * 0.5
 
 
 ## Hold-to-recall, per SPEC.md. The throw leaves on the press so that throwing

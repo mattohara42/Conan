@@ -184,25 +184,36 @@ func test_a_recall_steers_in_both_axes() -> void:
 	check_eq(arrived, Vector2.ZERO, "a sword already on you does not jitter")
 
 
-## The ledge is one tile, the blade is one tile, and the sword is pulled back
-## out of the plank so the whole tile is standable. Pushing it in instead buries
-## the half the player needs to stand on, which is the bug this pins down.
-func test_an_embedded_sword_backs_out_so_its_ledge_is_clear() -> void:
+## The whole one-tile ledge has to be outside the plank, or the wall pushes the
+## player off the end of the sliver that is left. A capture put a real sword at
+## 87.9 against a face at 88, which left 7.9 px of ledge for an 18 px player,
+## and that is the case these numbers exist to stop coming back.
+func test_an_embedded_sword_leaves_its_whole_ledge_outside_the_plank() -> void:
 	var world: WorldConfig = load("res://config/world.tres")
 	check_eq(world.sword_length, world.tile_size, "blade and tile are the same length")
-
-	var rightward := SwordFlight.embed_position(Vector2(100.0, 50.0), 1.0, 16.0)
-	check_eq(rightward, Vector2(96.0, 50.0), "a rightward throw settles back to the left")
-	var leftward := SwordFlight.embed_position(Vector2(100.0, 50.0), -1.0, 16.0)
-	check_eq(leftward, Vector2(104.0, 50.0), "and a leftward one back to the right")
-	check_eq(rightward.y, 50.0, "embedding never moves it vertically")
-
-	# The ledge is centred on the sword, so this is where its far edge lands
-	# relative to the surface the sword hit. It has to be behind it.
 	var half := world.sword_length * 0.5
+
+	# Thrown right, into the left face of a plank at x = 200.
+	var rightward := SwordFlight.embed_position(200.0, 1.0, world.sword_length)
+	check_eq(rightward, 192.0, "a rightward throw settles half a blade short of the face")
+	check_eq(rightward + half, 200.0, "so the ledge ends exactly at the face")
+	check(rightward + half <= 200.0, "and never reaches inside the plank")
+
+	# Thrown left, into the right face of a plank at x = 88, which is the case
+	# the M2 bench captures.
+	var leftward := SwordFlight.embed_position(88.0, -1.0, world.sword_length)
+	check_eq(leftward, 96.0, "a leftward throw settles half a blade past the face")
+	check_eq(leftward - half, 88.0, "so that ledge starts exactly at the face")
+
+	# A one-tile ledge is 16 px and the hero is 18 px wide, so the sword is a
+	# narrower perch than the thing standing on it. That works, because a body
+	# only needs its centre supported, but there is no margin in it. It is the
+	# first number to look at if standing on a sword turns out to feel fiddly.
 	check(
-		rightward.x + half < 100.0 + half,
-		"the ledge does not reach as far into the plank as the contact did"
+		world.sword_length >= world.hero_width * 0.8,
+		"a one-tile ledge is a usable perch for the hero (ledge %.0f, hero %.0f)" % [
+			world.sword_length, world.hero_width
+		]
 	)
 
 

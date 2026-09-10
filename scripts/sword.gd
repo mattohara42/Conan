@@ -164,15 +164,39 @@ func _fall_by(step: Vector2) -> void:
 	_landed = true
 
 
+## Finds the face the sword just went through and sits half a blade clear of it.
+##
+## Asking the world where the surface is, rather than inferring it from where
+## the sword was when the overlap got reported. `body_entered` arrives a frame
+## or so late, and at throw speed a frame is 7 px, so the inferred answer was
+## out by enough to bury half the ledge.
+##
+## The ray starts well back along the travel direction, outside the plank, and
+## runs past the sword, so the first thing it meets is the face that stopped it.
+func _settle_against_the_surface(direction: float) -> void:
+	var step := Vector2(signf(direction) * world.sword_length, 0.0)
+	var space := get_world_2d().direct_space_state
+	var query := PhysicsRayQueryParameters2D.create(
+		global_position - step * 2.0, global_position + step
+	)
+	query.collision_mask = 1
+	var hit := space.intersect_ray(query)
+	if hit.is_empty():
+		# Nothing found, so leave it where it stopped rather than teleport it
+		# somewhere arbitrary. Visible as a ledge overlapping the plank.
+		return
+	global_position.x = SwordFlight.embed_position(
+		hit["position"].x, direction, world.sword_length
+	)
+
+
 func _enter(next: SwordFlight.State) -> void:
 	state = next
 	match state:
 		SwordFlight.State.RETURNING:
 			_return_distance = 0.0
 		SwordFlight.State.EMBEDDED:
-			global_position = SwordFlight.embed_position(
-				global_position, _velocity.x, world.sword_length
-			)
+			_settle_against_the_surface(_velocity.x)
 			# Level, and pointing the way it was going, so the blade is in the
 			# plank and the hilt is the bit you stand on.
 			rotation = 0.0 if _velocity.x >= 0.0 else PI
