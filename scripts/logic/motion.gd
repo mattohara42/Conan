@@ -60,6 +60,26 @@ static func step_horizontal(
 	return move_toward(velocity_x, signf(input_dir) * max_speed, accel * delta)
 
 
+## How far a full-speed jump carries you horizontally, landing `rise` px above
+## where it started. Negative `rise` means landing lower down, which buys reach.
+##
+## This is the number every room is designed against, so it belongs here rather
+## than in a comment somebody has to recompute. Rooms assert against it: change
+## `jump_height` in M14 and the tests say which rooms stopped working.
+##
+## Returns 0 for a rise the jump cannot reach at all.
+static func jump_reach(
+	height: float, time_to_apex: float, fall_multiplier: float, run_speed: float, rise: float
+) -> float:
+	if rise > height or time_to_apex <= 0.0 or fall_multiplier <= 0.0:
+		return 0.0
+	var falling := gravity_for(height, time_to_apex) * fall_multiplier
+	if falling <= 0.0:
+		return 0.0
+	# Up to the apex, then back down to the landing height.
+	return run_speed * (time_to_apex + sqrt(2.0 * (height - rise) / falling))
+
+
 ## Releasing jump while still rising cuts the climb short. This is what makes
 ## jump height variable by hold duration without a second jump state.
 static func damp_on_release(velocity_y: float, damping: float) -> float:
