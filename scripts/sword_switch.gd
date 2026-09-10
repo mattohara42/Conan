@@ -19,6 +19,21 @@ const REACH: float = 12.0
 
 var is_held := false
 
+## The block itself, which is smaller than the area that senses it.
+var _block := Vector2.ZERO
+
+
+## Builds its own collision rather than being handed one, so nothing depends on
+## what a node added in code ends up being named. A `$CollisionShape2D` lookup
+## here found nothing, because Godot names an unnamed child `@ClassName@N`.
+func configure(block: Vector2) -> void:
+	_block = block
+	var shape := CollisionShape2D.new()
+	var box := RectangleShape2D.new()
+	box.size = block + Vector2.ONE * REACH * 2.0
+	shape.shape = box
+	add_child(shape)
+
 
 func _ready() -> void:
 	add_to_group("switches")
@@ -47,8 +62,9 @@ func _a_sword_is_in_it() -> bool:
 ## Gold when held, because gold means interactive and a switch you have spent a
 ## sword on should say so from across the room.
 func _draw() -> void:
-	var shape := $CollisionShape2D.shape as RectangleShape2D
-	var block := Rect2(-shape.size * 0.5, shape.size).grow(-REACH)
+	if _block == Vector2.ZERO:
+		return
+	var block := Rect2(-_block * 0.5, _block)
 	draw_rect(block, Palette.WOOD_DEEP)
 	draw_rect(Rect2(block.position, Vector2(block.size.x, 3.0)), Palette.WOOD_FACE)
 	var lamp: Color = Palette.GOLD_FACE if is_held else Palette.WOOD_FACE

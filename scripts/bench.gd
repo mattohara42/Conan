@@ -50,12 +50,8 @@ func _add_wood(rect: Rect2) -> void:
 func _add_switch(rect: Rect2) -> SwordSwitch:
 	_add_wood(rect)
 	var switch := SwordSwitch.new()
-	var shape := CollisionShape2D.new()
-	var box := RectangleShape2D.new()
-	box.size = rect.size + Vector2.ONE * SwordSwitch.REACH * 2.0
-	shape.shape = box
+	switch.configure(rect.size)
 	switch.position = rect.get_center()
-	switch.add_child(shape)
 	add_child(switch)
 	return switch
 
@@ -63,12 +59,8 @@ func _add_switch(rect: Rect2) -> SwordSwitch:
 ## A gate. Solid until something opens it, and it is the room that decides what.
 func _add_gate(rect: Rect2) -> Gate:
 	var gate := Gate.new()
-	var shape := CollisionShape2D.new()
-	var box := RectangleShape2D.new()
-	box.size = rect.size
-	shape.shape = box
+	gate.configure(rect.size)
 	gate.position = rect.get_center()
-	gate.add_child(shape)
 	add_child(gate)
 	return gate
 

@@ -197,8 +197,12 @@ class CaptureAgent:
 		for node in get_tree().get_nodes_in_group("gates"):
 			var gate := node as Gate
 			if gate != null:
-				print("capture: gate at %s %s" % [
-					gate.global_position, "OPEN" if gate.is_open else "shut"
+				# is_really_open, not is_open: the second is what was asked for
+				# and it once said OPEN while the bars stayed solid.
+				print("capture: gate at %s %s (asked for %s)" % [
+					gate.global_position,
+					"OPEN" if gate.is_really_open() else "SHUT",
+					"open" if gate.is_open else "shut"
 				])
 
 

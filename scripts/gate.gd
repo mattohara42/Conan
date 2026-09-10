@@ -6,9 +6,22 @@
 class_name Gate
 extends StaticBody2D
 
+## What was last asked for. Whether the bars actually moved is `is_really_open`,
+## and the two are not the same claim: this one is set the moment somebody asks.
 var is_open := false
 
-@onready var _shape: CollisionShape2D = $CollisionShape2D
+var _shape: CollisionShape2D
+
+
+## Builds its own collision rather than being handed one, so nothing depends on
+## what a node added in code ends up being named. A `$CollisionShape2D` lookup
+## here found nothing, because Godot names an unnamed child `@ClassName@N`.
+func configure(size: Vector2) -> void:
+	_shape = CollisionShape2D.new()
+	var box := RectangleShape2D.new()
+	box.size = size
+	_shape.shape = box
+	add_child(_shape)
 
 
 func _ready() -> void:
@@ -16,18 +29,31 @@ func _ready() -> void:
 
 
 func set_open(open: bool) -> void:
-	if open == is_open:
+	if open == is_open or _shape == null:
 		return
 	is_open = open
 	# Deferred because a switch reports during physics, and a body cannot change
-	# its own collision mid-step.
+	# its own collision mid-step. It lands on the next frame.
 	_shape.set_deferred("disabled", is_open)
 	queue_redraw()
+
+
+## Whether the bars are **actually** out of the way, read off the collision
+## shape rather than off what was last requested.
+##
+## These came apart once already: `set_open` set `is_open` and then failed to
+## reach the shape, so the gate reported open while staying solid, and the room
+## was unfinishable in a way its own log line denied. Anything reporting on a
+## gate should ask this one.
+func is_really_open() -> bool:
+	return _shape != null and _shape.disabled
 
 
 ## Drawn as the bars it is, so an open gate reads as an opening rather than as
 ## something that vanished.
 func _draw() -> void:
+	if _shape == null:
+		return
 	var shape := _shape.shape as RectangleShape2D
 	var rect := Rect2(-shape.size * 0.5, shape.size)
 	if is_open:
