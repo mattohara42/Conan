@@ -18,10 +18,17 @@
 ## is still held after the last phase stays held, which is what `--until-apex`
 ## needs to measure a running jump.
 ##
+## A phase named `-` holds nothing, which is how you wait for something the game
+## is doing on its own: "move_left:10;throw:6;-:45" faces left, throws, and then
+## lets go while the sword flies. Letting go matters, because an action held too
+## long is a different action: a held throw is a recall.
+##
 ## Writing over an existing file is the flag, not the default.
 extends SceneTree
 
 const SETTLE_FRAMES := 12
+## The phase name that means "hold nothing".
+const NOTHING_HELD := "-"
 
 var _scene_path := ""
 var _out_path := ""
@@ -84,8 +91,12 @@ func _parse_phases(text: String) -> Array[Dictionary]:
 		if parts.size() != 2:
 			printerr("capture: cannot read input phase \"%s\"" % chunk)
 			continue
+		# `-` is the empty controller, not an action called "-".
+		var actions := PackedStringArray()
+		if parts[0] != NOTHING_HELD:
+			actions = parts[0].split(",", false)
 		phases.append({
-			"actions": parts[0].split(",", false),
+			"actions": actions,
 			"frames": parts[1].to_int(),
 		})
 	return phases
