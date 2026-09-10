@@ -27,6 +27,15 @@ extends Resource
 ## Seconds between throws, so a held button is not an automatic weapon.
 @export var throw_cooldown: float = 0.18
 
+@export_group("Embed and recall")
+## Recall speed, px/s. Its own number rather than `speed`, because a recall is a
+## decision you make under pressure and how long it takes you to get the sword
+## back is the cost of that decision.
+@export var recall_speed: float = 380.0
+## How long the throw button has to be held before every embedded sword comes
+## home, seconds. Long enough that no throw tap reaches it.
+@export var recall_hold_time: float = 0.35
+
 @export_group("Dropping")
 ## A spent sword falls. It does not use the player's gravity: it is a thrown
 ## object, not a body, and it should not float like one.

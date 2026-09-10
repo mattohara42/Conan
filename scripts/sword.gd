@@ -15,23 +15,56 @@ signal destroyed
 @export var config: SwordConfig
 @export var world: WorldConfig
 
+## How deep the standable surface of an embedded sword is, px. Thin, because a
+## sword is thin, and the player stands on its top edge.
+const LEDGE_THICKNESS: float = 4.0
+
 var state: SwordFlight.State = SwordFlight.State.FLYING
 
 var _thrower: Node2D
 var _velocity := Vector2.ZERO
 var _distance_travelled := 0.0
 var _return_distance := 0.0
-var _hit_solid := false
+## What was run into this frame, cleared every frame. Wood and stone are the
+## same event to the physics engine and different events to the game.
+var _contact: SwordFlight.Contact = SwordFlight.Contact.NONE
 var _landed := false
+## Set by `recall()` and spent on the next step, so the player can ask without
+## knowing which state the sword happens to be in.
+var _recalled := false
 
 @onready var _shape: CollisionShape2D = $CollisionShape2D
+## The one-tile ledge an embedded sword becomes. A separate body because an
+## Area2D cannot be stood on, on its own layer so the sword's own detection
+## never sees it, and disabled everywhere except EMBEDDED.
+@onready var _ledge: CollisionShape2D = $Ledge/CollisionShape2D
 
 
 func _ready() -> void:
 	add_to_group("swords")
 	var box := _shape.shape as RectangleShape2D
 	box.size = Vector2(world.sword_length, world.sword_length * 0.36)
-	body_entered.connect(func(_body: Node2D) -> void: _hit_solid = true)
+	var ledge_box := _ledge.shape as RectangleShape2D
+	ledge_box.size = Vector2(world.sword_length, LEDGE_THICKNESS)
+	_ledge.disabled = true
+	body_entered.connect(_on_body_entered)
+
+
+## Wood is a group rather than a physics layer, because wood is ordinary solid
+## geometry that happens to bite. Making it its own layer would mean every room
+## remembering to mark planks as solid twice.
+func _on_body_entered(body: Node2D) -> void:
+	if _contact == SwordFlight.Contact.WOOD:
+		# Two bodies in one frame: wood wins, rather than whichever signal was
+		# emitted second.
+		return
+	_contact = SwordFlight.Contact.WOOD if body.is_in_group("wood") else SwordFlight.Contact.SOLID
+
+
+## Bring it home. Only an embedded sword answers; the rest ignore it, so the
+## player can shout at every sword on screen and let the machine sort it out.
+func recall() -> void:
+	_recalled = true
 
 
 ## Called by whoever threw it. `direction` is -1 or 1: the sword has no arc and
@@ -51,7 +84,7 @@ func _physics_process(delta: float) -> void:
 
 	var offset_after := target.x - global_position.x
 	var caught := (
-		state == SwordFlight.State.RETURNING
+		(state == SwordFlight.State.RETURNING or state == SwordFlight.State.RECALLING)
 		and SwordFlight.is_within(global_position, target, config.catch_radius)
 	)
 	var picked_up := (
@@ -65,13 +98,15 @@ func _physics_process(delta: float) -> void:
 		SwordFlight.return_spent(_return_distance, config.max_return_distance),
 		caught,
 		picked_up,
-		_hit_solid,
+		_contact,
 		state == SwordFlight.State.RETURNING and SwordFlight.has_overshot(
 			offset_before, offset_after
 		),
-		_landed
+		_landed,
+		_recalled
 	)
-	_hit_solid = false
+	_contact = SwordFlight.Contact.NONE
+	_recalled = false
 
 	if next != state:
 		_enter(next)
@@ -97,6 +132,12 @@ func _advance(delta: float) -> void:
 			var step := Vector2(_velocity.x * delta, 0.0)
 			global_position += step
 			_return_distance += absf(step.x)
+			rotation += config.spin_speed * delta * signf(_velocity.x)
+		SwordFlight.State.RECALLING:
+			_velocity = SwordFlight.recall_velocity(
+				global_position, _target_position(), config.recall_speed
+			)
+			global_position += _velocity * delta
 			rotation += config.spin_speed * delta * signf(_velocity.x)
 		SwordFlight.State.FALLING:
 			_velocity = SwordFlight.step_fall(
@@ -128,6 +169,20 @@ func _enter(next: SwordFlight.State) -> void:
 	match state:
 		SwordFlight.State.RETURNING:
 			_return_distance = 0.0
+		SwordFlight.State.EMBEDDED:
+			global_position = SwordFlight.embed_position(
+				global_position, _velocity.x, world.sword_length
+			)
+			# Level, and pointing the way it was going, so the blade is in the
+			# plank and the hilt is the bit you stand on.
+			rotation = 0.0 if _velocity.x >= 0.0 else PI
+			_velocity = Vector2.ZERO
+			_ledge.set_deferred("disabled", false)
+		SwordFlight.State.RECALLING:
+			# The ledge goes before the sword does. Standing on the one you are
+			# recalling is a legitimate and bad idea, per SPEC.md, and this is
+			# the line that makes it bad.
+			_ledge.set_deferred("disabled", true)
 		SwordFlight.State.FALLING:
 			# Keeps whatever horizontal speed it had, so a sword that sailed
 			# past you lands past you.
@@ -167,6 +222,17 @@ func _draw() -> void:
 	# A crossguard, drawn over the blade's base. Without it the silhouette reads
 	# as a dart, and ART_DIRECTION.md makes silhouette a rule rather than taste.
 	draw_rect(Rect2(-half * 0.4, -w * 1.6, w * 0.5, w * 3.2), Palette.GOLD_SHADE)
+	if state == SwordFlight.State.EMBEDDED:
+		# The actual collision extent, drawn. An assertion proves the ledge is
+		# there; only this proves it is where the player thinks it is.
+		draw_rect(
+			Rect2(-half, -LEDGE_THICKNESS * 0.5, world.sword_length, LEDGE_THICKNESS),
+			Color(Palette.GOLD_FACE, 0.28)
+		)
+		draw_line(
+			Vector2(-half, -LEDGE_THICKNESS * 0.5), Vector2(half, -LEDGE_THICKNESS * 0.5),
+			Palette.GOLD_FACE, 1.0
+		)
 	if state == SwordFlight.State.GROUNDED:
 		# A sword you can pick up should say so from across the room.
 		draw_arc(

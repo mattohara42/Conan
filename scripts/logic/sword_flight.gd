@@ -16,6 +16,10 @@ enum State {
 	FLYING,
 	## Coming back, steering in x toward the player's current position.
 	RETURNING,
+	## Coming back from wood, steering in both axes. See `recall_velocity`.
+	RECALLING,
+	## Bitten into wood, and a one-tile ledge while it stays there.
+	EMBEDDED,
 	## Spent. Gravity has it now.
 	FALLING,
 	## Lying on the floor, waiting to be walked over.
@@ -26,6 +30,18 @@ enum State {
 	DESTROYED,
 }
 
+## What the sword just ran into. One value rather than a pair of booleans,
+## because it cannot hit two kinds of surface in a frame and a pair would let
+## the caller say that it did.
+enum Contact {
+	NONE,
+	## Stone, and the end of that sword.
+	SOLID,
+	## Wood, which bites and holds. SPEC.md: this is the move that turns a
+	## weapon into a traversal tool.
+	WOOD,
+}
+
 
 ## The whole transition table in one function, so the machine can be read rather
 ## than reconstructed from scattered ifs.
@@ -34,21 +50,30 @@ enum State {
 ## inside your catch radius the throw already succeeded, and standing near a
 ## wall should not cost you the sword.
 ##
-## A solid hit only destroys during flight. A sword that is already falling is
-## already spent, and the floor it lands on is not what killed it.
+## A contact only decides anything during flight. A sword that is already
+## falling is already spent, and the floor it lands on is not what killed it.
+##
+## Wood beats stone on both flight legs, so the surface decides the outcome and
+## not which direction the sword happened to be going.
+##
+## A recall cannot fail. It steers through geometry and ends in your hand, and
+## the price of it is the ledge you just gave up, not the sword.
 static func next_state(
 	state: State,
 	at_max_range: bool,
 	return_spent: bool,
 	caught: bool,
 	picked_up: bool,
-	hit_solid: bool,
+	contact: Contact,
 	overshot: bool,
-	on_floor: bool
+	on_floor: bool,
+	recalled: bool
 ) -> State:
 	match state:
 		State.FLYING:
-			if hit_solid:
+			if contact == Contact.WOOD:
+				return State.EMBEDDED
+			if contact == Contact.SOLID:
 				return State.DESTROYED
 			if at_max_range:
 				return State.RETURNING
@@ -56,11 +81,21 @@ static func next_state(
 		State.RETURNING:
 			if caught:
 				return State.CAUGHT
-			if hit_solid:
+			if contact == Contact.WOOD:
+				return State.EMBEDDED
+			if contact == Contact.SOLID:
 				return State.DESTROYED
 			if overshot or return_spent:
 				return State.FALLING
 			return State.RETURNING
+		State.RECALLING:
+			if caught:
+				return State.CAUGHT
+			return State.RECALLING
+		State.EMBEDDED:
+			if recalled:
+				return State.RECALLING
+			return State.EMBEDDED
 		State.FALLING:
 			if on_floor:
 				return State.GROUNDED
@@ -103,6 +138,42 @@ static func return_velocity_x(sword_x: float, target_x: float, speed: float) -> 
 ## True when the sword is close enough to be back in your hand.
 static func is_within(sword_position: Vector2, target: Vector2, radius: float) -> bool:
 	return sword_position.distance_squared_to(target) <= radius * radius
+
+
+## Recall steers in **both** axes, which is the one place the sword breaks its
+## own flat rule. An embedded sword is above or below you far more often than
+## beside you, because being above you is why you threw it at that plank.
+static func recall_velocity(sword_position: Vector2, target: Vector2, speed: float) -> Vector2:
+	var offset := target - sword_position
+	if offset.length_squared() < 0.000001:
+		return Vector2.ZERO
+	return offset.normalized() * speed
+
+
+## Where a sword ends up when it bites wood.
+##
+## It is pulled **back** out of the wood, not pushed in, and that is the whole
+## point of this function. The ledge is one tile centred on the sword, so a
+## sword sitting on the surface would put half its ledge inside the plank, and
+## the player's capsule is wider than the half that was left. A ledge you cannot
+## stand on is not a ledge.
+##
+## A quarter length back covers the frame of overshoot between the overlap
+## happening and it being reported, which at throw speed is a handful of px.
+## The tip still reads as bitten in at game size.
+##
+## The ledge is one tile and `WorldConfig.sword_length` is one tile. Those two
+## numbers are tied together on purpose and the comment in that file says so.
+static func embed_position(contact_position: Vector2, direction: float, length: float) -> Vector2:
+	return contact_position - Vector2(signf(direction) * length * 0.25, 0.0)
+
+
+## Hold-to-recall, per SPEC.md. The throw leaves on the press so that throwing
+## never feels laggy, and the recall fires later on the same button, once it has
+## been held longer than any tap could last. `already_fired` keeps one hold from
+## recalling twice.
+static func recall_triggered(held_for: float, hold_time: float, already_fired: bool) -> bool:
+	return not already_fired and held_for >= hold_time
 
 
 ## One physics step of a spent sword falling, with its horizontal speed bleeding

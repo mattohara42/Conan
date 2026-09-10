@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/sword.gd" id="1_sword"]
 [ext_resource type="Resource" path="res://config/sword.tres" id="2_config"]
@@ -6,6 +6,9 @@
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_blade"]
 size = Vector2(16, 6)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ledge"]
+size = Vector2(16, 4)
 
 [node name="Sword" type="Area2D"]
 collision_layer = 8
@@ -16,3 +19,11 @@ world = ExtResource("3_world")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_blade")
+
+[node name="Ledge" type="StaticBody2D" parent="."]
+collision_layer = 16
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ledge"]
+shape = SubResource("RectangleShape2D_ledge")
+disabled = true

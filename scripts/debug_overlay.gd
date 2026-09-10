@@ -4,7 +4,7 @@
 extends CanvasLayer
 
 const LEGEND: PackedStringArray = [
-	"A/D move   Space jump   J throw   W/S ladders",
+	"A/D move   Space jump   J throw   hold J recall   W/S ladders",
 	"Tab preset   [ ] hero size   R respawn   F1 hide   F2 bench",
 ]
 
@@ -14,6 +14,7 @@ const LEGEND: PackedStringArray = [
 const BENCHES: PackedStringArray = [
 	"res://scenes/rooms/room_m0.tscn",
 	"res://scenes/rooms/room_m1.tscn",
+	"res://scenes/rooms/room_m2.tscn",
 ]
 
 @onready var _panel: PanelContainer = $Panel

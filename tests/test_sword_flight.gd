@@ -4,6 +4,8 @@ extends TestCase
 
 const DT := 1.0 / 60.0
 const S := SwordFlight.State
+const SOLID := SwordFlight.Contact.SOLID
+const WOOD := SwordFlight.Contact.WOOD
 
 
 ## Every transition out of every live state, in one place, because that is what
@@ -11,11 +13,11 @@ const S := SwordFlight.State
 func test_the_machine_goes_where_it_says_it_goes() -> void:
 	check_eq(_step(S.FLYING), S.FLYING, "flying stays flying")
 	check_eq(_step(S.FLYING, {"at_max_range": true}), S.RETURNING, "range turns it around")
-	check_eq(_step(S.FLYING, {"hit_solid": true}), S.DESTROYED, "a wall consumes it")
+	check_eq(_step(S.FLYING, {"contact": SOLID}), S.DESTROYED, "a wall consumes it")
 
 	check_eq(_step(S.RETURNING), S.RETURNING, "returning stays returning")
 	check_eq(_step(S.RETURNING, {"caught": true}), S.CAUGHT, "a catch ends it well")
-	check_eq(_step(S.RETURNING, {"hit_solid": true}), S.DESTROYED, "a wall ends it badly")
+	check_eq(_step(S.RETURNING, {"contact": SOLID}), S.DESTROYED, "a wall ends it badly")
 	check_eq(_step(S.RETURNING, {"overshot": true}), S.FALLING, "passing you spends it")
 	check_eq(_step(S.RETURNING, {"return_spent": true}), S.FALLING, "so does running away")
 
@@ -25,13 +27,19 @@ func test_the_machine_goes_where_it_says_it_goes() -> void:
 	check_eq(_step(S.GROUNDED), S.GROUNDED, "it waits")
 	check_eq(_step(S.GROUNDED, {"picked_up": true}), S.CAUGHT, "you walk over to it")
 
+	check_eq(_step(S.EMBEDDED), S.EMBEDDED, "an embedded sword stays put")
+	check_eq(_step(S.EMBEDDED, {"recalled": true}), S.RECALLING, "a hold calls it home")
+
+	check_eq(_step(S.RECALLING), S.RECALLING, "recalling stays recalling")
+	check_eq(_step(S.RECALLING, {"caught": true}), S.CAUGHT, "and ends in your hand")
+
 
 ## A catch beats a wall in the same frame. If the sword got inside your catch
 ## radius the throw already worked, and standing near a wall should not cost you
 ## a sword you had your hand on.
 func test_a_catch_beats_a_solid_hit() -> void:
 	check_eq(
-		_step(S.RETURNING, {"caught": true, "hit_solid": true}), S.CAUGHT,
+		_step(S.RETURNING, {"caught": true, "contact": SOLID}), S.CAUGHT,
 		"catch wins the tie"
 	)
 
@@ -41,14 +49,14 @@ func test_a_catch_beats_a_solid_hit() -> void:
 ## the done-when would be unreachable.
 func test_landing_is_not_the_same_event_as_hitting_a_wall() -> void:
 	check_eq(
-		_step(S.FALLING, {"hit_solid": true, "on_floor": true}), S.GROUNDED,
+		_step(S.FALLING, {"contact": SOLID, "on_floor": true}), S.GROUNDED,
 		"it lands rather than shatters"
 	)
-	check_eq(_step(S.FALLING, {"hit_solid": true}), S.FALLING, "and a wall does not stop it")
+	check_eq(_step(S.FALLING, {"contact": SOLID}), S.FALLING, "and a wall does not stop it")
 
 
 func test_terminal_states_are_terminal() -> void:
-	check_eq(_step(S.CAUGHT, {"hit_solid": true}), S.CAUGHT, "caught stays caught")
+	check_eq(_step(S.CAUGHT, {"contact": SOLID}), S.CAUGHT, "caught stays caught")
 	check_eq(_step(S.DESTROYED, {"caught": true}), S.DESTROYED, "destroyed stays destroyed")
 
 
@@ -121,6 +129,99 @@ func test_a_spent_sword_falls_and_bleeds_off_its_speed() -> void:
 	check_eq(terminal.y, 500.0, "capped at max fall speed")
 
 
+## Wood is the whole of M2. It has to bite on both legs, or which way the sword
+## happened to be travelling would decide whether you get a ledge, and the
+## player has no way to reason about that.
+func test_wood_bites_and_stone_kills() -> void:
+	check_eq(_step(S.FLYING, {"contact": WOOD}), S.EMBEDDED, "wood catches it on the way out")
+	check_eq(_step(S.RETURNING, {"contact": WOOD}), S.EMBEDDED, "and on the way back")
+	check_eq(_step(S.FLYING, {"contact": SOLID}), S.DESTROYED, "stone still kills it")
+	check_eq(_step(S.RETURNING, {"contact": SOLID}), S.DESTROYED, "on either leg")
+
+
+## A catch is still the best outcome available. Wood inside your catch radius
+## means you had your hand on it, and the same reasoning that beats a wall beats
+## a plank.
+func test_a_catch_beats_wood_too() -> void:
+	check_eq(
+		_step(S.RETURNING, {"caught": true, "contact": WOOD}), S.CAUGHT,
+		"catch wins that tie as well"
+	)
+
+
+## The cost of a recall is the ledge, not the sword. A recall that could be
+## eaten by the geometry between you and the plank would make the move a gamble,
+## and SPEC.md sells recall as the answer to the dragon rather than a risk.
+func test_a_recall_cannot_be_taken_away_from_you() -> void:
+	check_eq(_step(S.RECALLING, {"contact": SOLID}), S.RECALLING, "stone does not stop a recall")
+	check_eq(_step(S.RECALLING, {"contact": WOOD}), S.RECALLING, "nor does more wood")
+	check_eq(_step(S.RECALLING, {"return_spent": true}), S.RECALLING, "nor running away")
+	check_eq(_step(S.RECALLING, {"overshot": true}), S.RECALLING, "nor passing you")
+
+
+## An embedded sword answers nothing except the recall, because a ledge that
+## vanished when something brushed it would not be a ledge.
+func test_an_embedded_sword_ignores_everything_but_the_recall() -> void:
+	check_eq(_step(S.EMBEDDED, {"contact": SOLID}), S.EMBEDDED, "it is already in a wall")
+	check_eq(_step(S.EMBEDDED, {"caught": true}), S.EMBEDDED, "you cannot catch it by standing there")
+	check_eq(_step(S.EMBEDDED, {"on_floor": true}), S.EMBEDDED, "the floor is irrelevant to it")
+	check_eq(_step(S.EMBEDDED, {"at_max_range": true}), S.EMBEDDED, "so is its old range")
+
+
+## Unlike the return leg, which is flat on purpose, a recall steers in y as well.
+## The whole reason to embed a sword is to put it somewhere you are not.
+func test_a_recall_steers_in_both_axes() -> void:
+	var straight_up := SwordFlight.recall_velocity(Vector2(0.0, 100.0), Vector2(0.0, 0.0), 380.0)
+	check_near(straight_up.x, 0.0, 0.001, "no drift when it is directly below you")
+	check_near(straight_up.y, -380.0, 0.001, "and it climbs at the recall speed")
+
+	var diagonal := SwordFlight.recall_velocity(Vector2.ZERO, Vector2(30.0, 40.0), 100.0)
+	check_near(diagonal.length(), 100.0, 0.001, "a diagonal recall is not faster than a straight one")
+	check_near(diagonal.x, 60.0, 0.001, "3-4-5, so x is 60")
+	check_near(diagonal.y, 80.0, 0.001, "and y is 80")
+
+	var arrived := SwordFlight.recall_velocity(Vector2(5.0, 5.0), Vector2(5.0, 5.0), 380.0)
+	check_eq(arrived, Vector2.ZERO, "a sword already on you does not jitter")
+
+
+## The ledge is one tile, the blade is one tile, and the sword is pulled back
+## out of the plank so the whole tile is standable. Pushing it in instead buries
+## the half the player needs to stand on, which is the bug this pins down.
+func test_an_embedded_sword_backs_out_so_its_ledge_is_clear() -> void:
+	var world: WorldConfig = load("res://config/world.tres")
+	check_eq(world.sword_length, world.tile_size, "blade and tile are the same length")
+
+	var rightward := SwordFlight.embed_position(Vector2(100.0, 50.0), 1.0, 16.0)
+	check_eq(rightward, Vector2(96.0, 50.0), "a rightward throw settles back to the left")
+	var leftward := SwordFlight.embed_position(Vector2(100.0, 50.0), -1.0, 16.0)
+	check_eq(leftward, Vector2(104.0, 50.0), "and a leftward one back to the right")
+	check_eq(rightward.y, 50.0, "embedding never moves it vertically")
+
+	# The ledge is centred on the sword, so this is where its far edge lands
+	# relative to the surface the sword hit. It has to be behind it.
+	var half := world.sword_length * 0.5
+	check(
+		rightward.x + half < 100.0 + half,
+		"the ledge does not reach as far into the plank as the contact did"
+	)
+
+
+## The throw leaves on the press and the recall arrives later on the same hold,
+## so the threshold has to sit above any plausible tap and fire exactly once.
+func test_recall_needs_a_hold_and_fires_once() -> void:
+	var config: SwordConfig = load("res://config/sword.tres")
+	var hold := config.recall_hold_time
+	check(hold > 0.2, "the threshold is longer than a tap (%.2f s)" % hold)
+
+	check(not SwordFlight.recall_triggered(0.0, hold, false), "a press alone is a throw")
+	check(not SwordFlight.recall_triggered(hold - 0.01, hold, false), "just short is still a throw")
+	check(SwordFlight.recall_triggered(hold, hold, false), "the threshold fires it")
+	check(
+		not SwordFlight.recall_triggered(hold + 5.0, hold, true),
+		"and one hold only recalls once, however long it lasts"
+	)
+
+
 func test_every_state_has_a_readable_name() -> void:
 	for state in S.values():
 		check(not SwordFlight.state_name(state).is_empty(), "state %d is named" % state)
@@ -135,7 +236,8 @@ func _step(state: SwordFlight.State, facts: Dictionary = {}) -> SwordFlight.Stat
 		facts.get("return_spent", false),
 		facts.get("caught", false),
 		facts.get("picked_up", false),
-		facts.get("hit_solid", false),
+		facts.get("contact", SwordFlight.Contact.NONE),
 		facts.get("overshot", false),
-		facts.get("on_floor", false)
+		facts.get("on_floor", false),
+		facts.get("recalled", false)
 	)
