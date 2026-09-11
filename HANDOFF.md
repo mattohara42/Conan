@@ -41,9 +41,6 @@ engine gravity from 0 to 980. Close the editor, read `git diff project.godot`,
 restore it, then pull. `tests/test_project_settings.gd` catches that specific
 loss and not every one.
 
-**`tools/dev.sh import` leaves 18 untracked `.uid` files**, because 22 are
-committed and the rest never were. One commit fixes it.
-
 **CI runs the game and logs what happened**: where a sword landed, the death
 loop, which braziers are lit, where a respawn put the player. Four M2 geometry
 bugs got past green assertions and a running build caught every one.
