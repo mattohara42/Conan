@@ -67,15 +67,12 @@ traversal is climbing may have traded away the fun of moving.
 
 ## Blocked on Matt
 
-1. **Is 40 px the right hero height?** `[` and `]` cycle 28 / 34 / 40 / 46 / 54.
-   Blocks M5 too, being the hero's pixel height.
-2. **A sword ledge is 16 px and the hero is 18 px wide.** You can stand on it,
+1. **A sword ledge is 16 px and the hero is 18 px wide.** You can stand on it,
    because a body needs only its centre supported, but there is no margin. First
    number to look at if standing on a sword feels fiddly.
-3. **Wood's colour.** `ART_DIRECTION.md` says deep darks are warm umber in wood
+2. **Wood's colour.** `ART_DIRECTION.md` says deep darks are warm umber in wood
    and also that anything you stand on is cold and matte. M2 wood is both. Read
    as warm in hue, matte in saturation. Two constants in `Palette` to change.
-4. **The hero's name.** Needed before M5 paints him, not before.
 
 ## Distribution
 

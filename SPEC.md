@@ -201,7 +201,8 @@ the moment the hero has a different name, and the game becomes an actual
 reimagination rather than a remake wearing a hat. **Volta stays**, being a unit
 of electric potential and a real surname rather than an owned character.
 
-**The hero still needs a name.** Not urgent, and not settled by the repo name.
+**The hero is Lothar of the Hill People.** Settled, and it is what M5 paints and
+what any string a player reads will call him.
 
 ## What the repo inherits from the first attempt
 
