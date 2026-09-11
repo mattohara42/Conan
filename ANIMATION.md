@@ -76,7 +76,7 @@ the muskellunge and the northern pike ran into from the other direction.
 | climb | rig | |
 | **somersault** | **painted, 6 frames** | The signature move of the original. Earn it |
 | **dive** | **painted, 4 frames** | A fall past a threshold speed becomes this |
-| **death** | **painted, 5 frames** | One per hazard family would be better. One is fine for v1 |
+| **death** | **painted, 5 frames** | Plays inside `death_hold` in `config/death.tres`, 0.25 s, so five frames is 20 fps. One per hazard family would be better. One is fine for v1 |
 | **enemies** | rig | All six. A bat is two wings and a body |
 | **the sword in flight** | **one sprite, rotated** | Never generate rotation frames. It is a transform |
 
