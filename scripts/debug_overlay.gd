@@ -17,6 +17,7 @@ const BENCHES: PackedStringArray = [
 	"res://scenes/rooms/room_m2.tscn",
 	"res://scenes/rooms/room_m2_gap.tscn",
 	"res://scenes/rooms/room_m2_switch.tscn",
+	"res://scenes/rooms/room_m3.tscn",
 ]
 
 @onready var _panel: PanelContainer = $Panel
@@ -24,6 +25,7 @@ const BENCHES: PackedStringArray = [
 
 var _player: Player
 var _world: WorldConfig
+var _death: DeathConfig
 
 
 func _ready() -> void:
@@ -31,6 +33,7 @@ func _ready() -> void:
 	_player = found as Player
 	if _player != null:
 		_world = _player.world
+		_death = _player.death_config
 	var style := StyleBoxFlat.new()
 	# STONE_DEEP over BACKDROP, because a panel the colour of the room it sits on
 	# is not a panel. Found by looking at a screenshot, not by a test.
@@ -62,6 +65,8 @@ func _swords_in_play() -> String:
 
 
 func _state_of(player: Player) -> String:
+	if player.is_dead():
+		return DeathClock.phase_name(player.death_phase())
 	if player.climbing:
 		return "climbing"
 	return "on floor" if player.is_on_floor() else "airborne"
@@ -97,6 +102,11 @@ func _process(_delta: float) -> void:
 		],
 		"last jump   %.0f px apex   %s" % [_player.peak_height, cleared],
 		"swords      %d held   %s" % [_player.swords_held, _swords_in_play()],
+		"deaths      %d   last loop %s   budget %.2f s" % [
+			_player.deaths,
+			"none yet" if _player.deaths == 0 else "%.3f s" % _player.last_downtime,
+			DeathClock.downtime(_death.death_hold, _death.respawn_freeze),
+		],
 		"fps         %d" % Engine.get_frames_per_second(),
 		"",
 	] + Array(LEGEND))

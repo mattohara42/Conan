@@ -13,6 +13,7 @@ extends CharacterBody2D
 @export var preset_strong: MovementConfig
 @export var world: WorldConfig
 @export var sword_config: SwordConfig
+@export var death_config: DeathConfig
 @export var sword_scene: PackedScene
 
 ## Hero heights to cycle with [ and ], around ART_DIRECTION.md's estimate of 40.
@@ -42,6 +43,19 @@ var _recall_fired := false
 var _coyote_timer := 0.0
 var _buffer_timer := 0.0
 
+## The death loop. `_death_elapsed` accumulates real deltas rather than being
+## compared against a wall clock, so `last_downtime` is what the game actually
+## took and not what config/death.tres asked for. Those differ by up to a frame
+## and the measured one is the one M3's done-when is about.
+var _dead := false
+var _death_elapsed := 0.0
+## Read by the debug overlay. Seconds from dying to the controls answering, as
+## measured on the last death. Zero until you have died once.
+var last_downtime := 0.0
+## Read by the debug overlay. Dying twenty times in a row is the other half of
+## M3's done-when and counting them is how you know you did.
+var deaths := 0
+
 # Ladders currently overlapping the body.
 var _ladders_touched := 0
 ## Read by the debug overlay.
@@ -70,6 +84,12 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_handle_debug_keys()
+
+	# Before the input reads, not after. A dead player who still gets a frame of
+	# steering is the bug this ordering exists to prevent.
+	if _dead:
+		_step_death(delta)
+		return
 
 	var on_floor := is_on_floor()
 	var input_dir := Input.get_axis("move_left", "move_right")
@@ -161,6 +181,71 @@ func _recall_embedded() -> void:
 			sword.recall()
 
 
+## Killed. Called by anything in the "hazards" group that touches you, and by
+## nothing else: there is no damage, no health and no second chance, which is
+## SPEC.md keeping the original's lethality on purpose.
+##
+## Idempotent, because lava is one area and falling into it reports on more than
+## one frame. A second call inside a death would otherwise restart the clock and
+## strand you.
+func die() -> void:
+	if _dead:
+		return
+	_dead = true
+	_death_elapsed = 0.0
+	velocity = Vector2.ZERO
+	climbing = false
+	deaths += 1
+	queue_redraw()
+
+
+## One physics step of being dead. `move_and_slide` is deliberately not called,
+## so the body stays where it was killed for the whole hold rather than sliding
+## or falling through what it died on.
+func _step_death(delta: float) -> void:
+	var hold := death_config.death_hold
+	var freeze := death_config.respawn_freeze
+	var before := _death_elapsed
+	_death_elapsed += delta
+
+	if DeathClock.crosses_placement(before, _death_elapsed, hold):
+		_place_at_checkpoint(death_config.restore_swords)
+
+	if DeathClock.has_control(_death_elapsed, hold, freeze):
+		# The measured figure, not the budgeted one. It overshoots config by up
+		# to a frame because control returns on a step boundary, and that
+		# overshoot is real: it is what the player waited through.
+		last_downtime = _death_elapsed
+		_dead = false
+		_death_elapsed = 0.0
+	queue_redraw()
+
+
+## Back at the checkpoint. Swords in play are destroyed rather than left lying,
+## or a room would fill with the evidence of twenty failed attempts.
+func _place_at_checkpoint(restore_swords: bool) -> void:
+	global_position = spawn_point
+	velocity = Vector2.ZERO
+	peak_height = 0.0
+	if restore_swords:
+		swords_held = swords_at_spawn
+	for node in get_tree().get_nodes_in_group("swords"):
+		node.queue_free()
+
+
+func is_dead() -> bool:
+	return _dead
+
+
+## For the overlay. ALIVE while alive, so the caller needs no null case.
+func death_phase() -> DeathClock.Phase:
+	if not _dead:
+		return DeathClock.Phase.ALIVE
+	return DeathClock.phase_at(
+		_death_elapsed, death_config.death_hold, death_config.respawn_freeze
+	)
+
+
 ## Set by a room that hands out a different number. Also resets what you are
 ## holding, since it is called before the room's puzzle has begun.
 func set_swords_at_spawn(count: int) -> void:
@@ -219,15 +304,13 @@ func _handle_debug_keys() -> void:
 	if Input.is_action_just_pressed("debug_next_preset"):
 		config = preset_strong if config == preset_climb else preset_climb
 	if Input.is_action_just_pressed("debug_respawn"):
-		global_position = spawn_point
-		velocity = Vector2.ZERO
-		peak_height = 0.0
-		# Swords come back too, or a bench with a sword puzzle in it needs the
-		# scene reloading every time you spend one badly. SPEC.md says a real
-		# death does this as well; M3 owns that.
-		swords_held = swords_at_spawn
-		for node in get_tree().get_nodes_in_group("swords"):
-			node.queue_free()
+		# R stays an instant teleport rather than a death. It is how you get out
+		# of a bench you have wedged, and routing it through the death loop would
+		# make the quickest key in the repo cost most of a second. Dying is what
+		# lava is for.
+		_place_at_checkpoint(true)
+		_dead = false
+		_death_elapsed = 0.0
 	var step := 0
 	if Input.is_action_just_pressed("debug_size_up"):
 		step = 1
@@ -257,7 +340,14 @@ func _draw() -> void:
 	# STONE_MID platforms a STONE_LIT capsule does not separate. The fix the
 	# direction names is a rim light from the nearest real light source, so the
 	# grey box gets one too.
-	var body := Color(Palette.GOLD_FACE, 0.95) if climbing else Palette.STONE_LIT
+	# ART_DIRECTION.md reserves warm and saturated for what kills you, so a
+	# killed hero borrows lava's darkest value rather than going grey, which the
+	# direction forbids anyway.
+	var body := Palette.STONE_LIT
+	if _dead:
+		body = Palette.LAVA_CRUST
+	elif climbing:
+		body = Color(Palette.GOLD_FACE, 0.95)
 	draw_circle(Vector2(0.0, top), r, body)
 	draw_circle(Vector2(0.0, bottom), r, body)
 	draw_rect(Rect2(-r, top, r * 2.0, bottom - top), body)

@@ -20,6 +20,7 @@ const LADDER_OVERSHOOT: float = 28.0
 var _solids: Array[Rect2] = []
 var _ladders: Array[Rect2] = []
 var _woods: Array[Rect2] = []
+var _lavas: Array[Rect2] = []
 
 
 func _add_solid(rect: Rect2) -> StaticBody2D:
@@ -46,6 +47,22 @@ func _add_wood(rect: Rect2, drawn := true) -> void:
 	# otherwise get plank grain drawn underneath it.
 	if drawn:
 		_woods.append(rect)
+
+
+## Lava. Not solid: you fall into it and it kills you, which is the whole of
+## SPEC.md's hazard design and the reason `Hazard` has no other behaviour.
+##
+## Drawn flat here. ART_DIRECTION.md and BUILD_PLAN.md M9 both say bubbling lava
+## is a scrolling noise displacement plus an emitter plus heat haze, and that
+## drawing it as a PNG loop is a bug in the approach. A grey-box rectangle is
+## neither, and M9 replaces this.
+func _add_lava(rect: Rect2) -> Hazard:
+	_lavas.append(rect)
+	var hazard := Hazard.new()
+	hazard.configure(rect.size)
+	hazard.position = rect.get_center()
+	add_child(hazard)
+	return hazard
 
 
 ## A switch, sized to `rect`, with its detection area grown past the block so a
@@ -145,6 +162,22 @@ func _draw_bench(width: float) -> void:
 					Vector2(rect.position.x, y), Vector2(rect.end.x, y),
 					Palette.WOOD_FACE, 1.0
 				)
+	for rect in _lavas:
+		# Darkest at the crust, brightest in the fissures, which is the value
+		# order ART_DIRECTION.md gives lava. Flat bands stand in for the shader.
+		draw_rect(rect, Palette.LAVA_CRUST)
+		draw_rect(
+			Rect2(rect.position + Vector2(0.0, 3.0), Vector2(rect.size.x, rect.size.y - 3.0)),
+			Palette.LAVA_FLOW
+		)
+		var fissures := int(rect.size.x / 18.0)
+		for i in fissures:
+			var x := rect.position.x + 18.0 * float(i) + 9.0
+			draw_line(
+				Vector2(x, rect.position.y + 4.0), Vector2(x, rect.position.y + 11.0),
+				Palette.LAVA_FISSURE, 2.0
+			)
+		draw_rect(Rect2(rect.position, Vector2(rect.size.x, 2.0)), Palette.LAVA_CORE)
 	for rect in _ladders:
 		# Cold and matte, with gold rungs. ART_DIRECTION.md reserves warm and
 		# saturated for things that kill you, and a ladder is the opposite of

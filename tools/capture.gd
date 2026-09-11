@@ -148,6 +148,7 @@ class CaptureAgent:
 
 		if player != null:
 			print("capture: player at %s, peak %.1f px" % [player.global_position, player.peak_height])
+			_report_deaths(player)
 		_report_swords()
 		_report_mechanisms()
 
@@ -161,6 +162,23 @@ class CaptureAgent:
 			return
 		print("capture: wrote %s at %dx%d" % [_out_path, image.get_width(), image.get_height()])
 		get_tree().quit(0)
+
+	## Whether the run died, and what the loop actually cost.
+	##
+	## BUILD_PLAN.md M3 budgets a second from death to moving again and
+	## `test_death_clock.gd` holds `config/death.tres` to it, but that asserts
+	## the intent. This is the figure a running build produced, which is the one
+	## the done-when is about, and it is the only way a headless CI run can tell
+	## that lava killed anybody at all.
+	func _report_deaths(player: Player) -> void:
+		if player.deaths == 0:
+			print("capture: no deaths")
+			return
+		print("capture: %d death(s), last loop %.3f s, %s" % [
+			player.deaths, player.last_downtime,
+			DeathClock.phase_name(player.death_phase()),
+		])
+
 
 	## What every sword ended up doing, and where.
 	##

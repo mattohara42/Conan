@@ -83,6 +83,19 @@ jobs:
             --input="move_left:10;throw:6;-:40" --zoom=0.55 --centre=220,250 \
             --overwrite
 
+      # M3's claim is a measurement: under a second from death to moving again.
+      # This runs the player off the first ledge into lava and waits out the
+      # whole loop, so the log line says how many deaths happened and what the
+      # loop actually cost in a running build. It also draws the lava, which was
+      # written without anybody seeing it.
+      - name: Screenshot lava, and time a death
+        run: |
+          xvfb-run -a ~/godot/godot --path . --resolution 1280x720 \
+            --script res://tools/capture.gd -- \
+            --scene=res://scenes/rooms/room_m3.tscn --out=room_m3.png \
+            --input="move_right:100;-:60" --zoom=0.55 --centre=350,220 \
+            --overwrite
+
       - name: Keep the screenshots
         uses: actions/upload-artifact@v4
         with:
@@ -92,3 +105,4 @@ jobs:
             room_m2_embed.png
             room_m2_gap.png
             room_m2_switch.png
+            room_m3.png
