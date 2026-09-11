@@ -17,6 +17,10 @@ signal held_changed(is_held: bool)
 ## wide and whether it registers is down to rounding.
 const REACH: float = 12.0
 
+## The slot a blade goes into, in px. Sits at the block's vertical centre, which
+## is throw height, because that is where a thrown sword actually arrives.
+const SLOT_HEIGHT: float = 8.0
+
 var is_held := false
 
 ## The block itself, which is smaller than the area that senses it.
@@ -59,14 +63,32 @@ func _a_sword_is_in_it() -> bool:
 	return false
 
 
-## Gold when held, because gold means interactive and a switch you have spent a
-## sword on should say so from across the room.
+## Gold **before** it is used, not after.
+##
+## ART_DIRECTION.md reserves gold for what the player interacts with, and the
+## first version of this honoured that backwards: a brown box until a sword was
+## in it, then gold. That tells you what the thing was one moment after you
+## needed telling. It read as a crate and it was found by playing.
+##
+## So: gold from across the room, and a slot at throw height, so the shape says
+## a blade goes in here rather than leaving you to discover it by spending one.
 func _draw() -> void:
 	if _block == Vector2.ZERO:
 		return
 	var block := Rect2(-_block * 0.5, _block)
+	var gold: Color = Palette.GOLD_FACE if is_held else Palette.GOLD_SHADE
+
 	draw_rect(block, Palette.WOOD_DEEP)
 	draw_rect(Rect2(block.position, Vector2(block.size.x, 3.0)), Palette.WOOD_FACE)
-	var lamp: Color = Palette.GOLD_FACE if is_held else Palette.WOOD_FACE
-	draw_rect(block.grow(-4.0), Color(lamp, 0.55 if is_held else 0.2))
-	draw_rect(block, lamp, false, 1.0)
+
+	var slot := Rect2(block.position.x, -SLOT_HEIGHT * 0.5, block.size.x, SLOT_HEIGHT)
+	draw_rect(slot, Palette.GOLD_FACE if is_held else Palette.BACKDROP)
+	draw_line(slot.position, Vector2(slot.end.x, slot.position.y), gold, 1.0)
+	draw_line(Vector2(slot.position.x, slot.end.y), slot.end, gold, 1.0)
+
+	# Mouth plates at both ends. A sword can arrive from either side, and the
+	# silhouette needs the notch in it either way: ART_DIRECTION.md makes
+	# silhouette a rule rather than a preference.
+	var plate := Vector2(3.0, SLOT_HEIGHT + 10.0)
+	draw_rect(Rect2(block.position.x, -plate.y * 0.5, plate.x, plate.y), gold)
+	draw_rect(Rect2(block.end.x - plate.x, -plate.y * 0.5, plate.x, plate.y), gold)
