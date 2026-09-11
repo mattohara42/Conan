@@ -75,6 +75,16 @@ an aesthetic**. Two hard constraints:
 cold and matte.** A player should be able to answer "can I touch that" from
 colour alone, at speed, in peripheral vision.
 
+3. **A mechanism reads as a mechanism before it is used.** Gold is reserved for
+   what the player interacts with, and that reservation buys nothing if the gold
+   only arrives once the thing has been operated. A switch, a brazier, a gem
+   holder: each has to say what it wants while the player is still deciding, not
+   confirm it afterwards. Shape carries as much of this as colour, so a
+   mechanism gets a silhouette that names the verb: a slot takes a blade.
+
+   Found by playing. M2's switch was a brown box that turned gold once a sword
+   was in it, and the person who built the room could not find it.
+
 ## Outline and edge
 
 Painted, so no uniform outline. Form is separated by **value and by edge

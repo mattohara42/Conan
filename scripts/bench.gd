@@ -38,17 +38,20 @@ func _add_solid(rect: Rect2) -> StaticBody2D:
 ## Solid like anything else, and in the "wood" group so a sword can tell. Wood
 ## is not its own physics layer: it is ordinary geometry that happens to bite,
 ## and a layer would mean every room declaring it solid twice.
-func _add_wood(rect: Rect2) -> void:
+func _add_wood(rect: Rect2, drawn := true) -> void:
 	_add_solid(rect).add_to_group("wood")
 	# Drawn as wood rather than stone, so it comes back out of the stone list.
 	_solids.remove_at(_solids.size() - 1)
-	_woods.append(rect)
+	# `drawn` is false for wood that paints itself, like a switch, which would
+	# otherwise get plank grain drawn underneath it.
+	if drawn:
+		_woods.append(rect)
 
 
 ## A switch, sized to `rect`, with its detection area grown past the block so a
 ## sword resting against its face registers. It is wood, so a throw bites it.
 func _add_switch(rect: Rect2) -> SwordSwitch:
-	_add_wood(rect)
+	_add_wood(rect, false)
 	var switch := SwordSwitch.new()
 	switch.configure(rect.size)
 	switch.position = rect.get_center()

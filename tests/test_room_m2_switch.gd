@@ -84,14 +84,22 @@ func test_a_floor_level_throw_meets_the_switch() -> void:
 ## the gate never opens.
 func test_the_embedded_sword_lands_inside_the_switch() -> void:
 	var world: WorldConfig = load("res://config/world.tres")
+	# The switch is in the left wall, so the throw goes left into its right face.
 	var sword_x := SwordFlight.embed_position(
-		RoomM2Switch.SWITCH.position.x, 1.0, world.sword_length
+		RoomM2Switch.SWITCH.end.x, -1.0, world.sword_length
 	)
 	var sensed := RoomM2Switch.SWITCH.grow(SwordSwitch.REACH)
 	check(
-		sword_x >= sensed.position.x,
-		"the sword settles at %.0f and the switch senses from %.0f" % [
-			sword_x, sensed.position.x
+		sword_x <= sensed.end.x,
+		"the sword settles at %.0f and the switch senses out to %.0f" % [
+			sword_x, sensed.end.x
+		]
+	)
+	# And the ledge it makes has to be clear of the wall, or it is inside stone.
+	check(
+		sword_x - world.sword_length * 0.5 >= RoomM2Switch.SWITCH.end.x,
+		"its ledge starts at %.0f, clear of the wall face at %.0f" % [
+			sword_x - world.sword_length * 0.5, RoomM2Switch.SWITCH.end.x
 		]
 	)
 

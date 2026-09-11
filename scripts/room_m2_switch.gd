@@ -6,7 +6,8 @@
 ## rather than one of two: with three you would spend one on the switch and
 ## another on the gap, and never learn what recall is for.
 ##
-##   1. Throw the sword into the switch. The gate opens while it is held.
+##   1. Turn around and throw the sword into the switch set in the wall behind
+##      you. The gate opens while it is held.
 ##   2. Walk through. You are now past the gate and out of swords.
 ##   3. The gap beyond needs a ledge, and your sword is in the switch. An
 ##      embedded sword cannot be walked over and picked up, only recalled.
@@ -27,9 +28,20 @@ const ROOM_WIDTH: float = 900.0
 ## One. See the class comment: the whole puzzle rests on this number.
 const SWORDS_HANDED_OUT: int = 1
 
-## Wood, on the floor, at the height a standing throw travels. Walking into it
-## does nothing: a switch is weight in a socket, not a tripwire.
-const SWITCH := Rect2(300.0, FLOOR_TOP - 40.0, 24.0, 40.0)
+## Set into the left wall, flush with its face, occupying the bottom 40 px so
+## the slot lands at exactly the height a standing throw travels.
+##
+## It stood free on the floor first and read as a crate: the person who built
+## the room could not find it. A mechanism in a wall is a fixture; the same
+## mechanism on the floor is furniture, and no amount of gold paint on a box in
+## the middle of a room fixes that. ART_DIRECTION.md carries the general rule.
+##
+## Walking into it still does nothing. A switch is weight in a socket.
+const SWITCH := Rect2(0.0, FLOOR_TOP - 40.0, 24.0, 40.0)
+
+## The stone above the switch, which is what makes it read as set **into**
+## something rather than stuck **onto** it.
+const SWITCH_WALL := Rect2(0.0, 0.0, 24.0, FLOOR_TOP - 40.0)
 
 ## Stone, and 120 px of it above the floor against a 56 px jump, so the only way
 ## past is the switch. A sword thrown at it while it is shut is a sword gone.
@@ -47,6 +59,7 @@ func _ready() -> void:
 	_hand_out_swords(SWORDS_HANDED_OUT)
 
 	_add_solid(Rect2(0.0, FLOOR_TOP, NEAR_EDGE, ROOM_HEIGHT - FLOOR_TOP))
+	_add_solid(SWITCH_WALL)
 	_add_solid(Rect2(FAR_EDGE, FAR_TOP, ROOM_WIDTH - FAR_EDGE, ROOM_HEIGHT - FAR_TOP))
 	_add_solid(Rect2(NEAR_EDGE, PIT_TOP, FAR_EDGE - NEAR_EDGE, ROOM_HEIGHT - PIT_TOP))
 	_add_wood(POST)
