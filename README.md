@@ -43,7 +43,7 @@ first thing to read at the start of a session.
 
 ## Running it
 
-Godot 4.7.1, no addons and no build step. Open the project and press play, or
+Godot 4.7.2, no addons and no build step. Open the project and press play, or
 drive it through one script that finds Godot on macOS and Linux for you:
 
 ```
