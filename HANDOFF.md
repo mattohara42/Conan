@@ -73,6 +73,9 @@ traversal is climbing may have traded away the fun of moving.
 2. **Wood's colour.** `ART_DIRECTION.md` says deep darks are warm umber in wood
    and also that anything you stand on is cold and matte. M2 wood is both. Read
    as warm in hue, matte in saturation. Two constants in `Palette` to change.
+3. **Is Lothar of the Hill People the real name?** Held deliberately, not
+   forgotten. It is a Mike Myers bit, so the question is tone rather than
+   spelling, and M5 paints him. Answer it before there is a face, not after.
 
 ## Distribution
 
