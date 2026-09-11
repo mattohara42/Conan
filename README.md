@@ -1,7 +1,7 @@
 # Volta Redux
 
 A 2D puzzle platformer in Godot 4, reimagining Datasoft's *Conan: Hall of Volta*
-(1984). **M1: the sword throws, returns, is caught, and is consumed.**
+(1984). **M3: lava kills, and dying costs under half a second.**
 
 ## What it is
 
@@ -72,10 +72,17 @@ through `xvfb-run`, on macOS it does not, and `tools/capture.gd` documents
 
 ## Working on it with Claude
 
-`.claude/` carries the local workflow: a SessionStart hook that reads the active
-milestone out of `HANDOFF.md`, `/milestone`, `/shot` and `/handoff`, and a
-permission allowlist so the build commands do not prompt. Personal overrides go
-in `.claude/settings.local.json`, which is ignored.
+`.claude/` carries the local workflow: `/milestone`, `/shot` and `/handoff`, a
+permission allowlist so the build commands do not prompt, and two hooks that
+exist because **docs go stale silently and it has cost real work**.
+
+`session-start.sh` reads the active milestone out of `HANDOFF.md`, and warns
+when the checkout is behind `origin/main` so those lines are not believed after
+main has moved past them. `docs-check.sh` fires at the end of a turn and says so
+when a branch has committed code without touching `HANDOFF.md`. Neither can
+write a doc: they notice and they point at `/handoff`.
+
+Personal overrides go in `.claude/settings.local.json`, which is ignored.
 
 **Feel criteria need a human playing the game**, so Phase 1 belongs on a real
 machine rather than in a cloud session. Doc passes, `scripts/logic/` work and
@@ -84,9 +91,14 @@ test writing are headless-verifiable and travel fine.
 ## Where the numbers live
 
 Every value that decides how the game feels is in `config/`, and nothing in a
-script sets one. `config/movement.tres` and `config/movement_ladders.tres` are
-the two answers to the open jump question in `SPEC.md`, and Tab swaps between
-them while you play. `config/world.tres` holds hero size and tier height.
+script sets one.
+
+`config/movement.tres` is the settled jump: 56 px against a 96 px tier, so a
+storey is climbed rather than jumped. `config/movement_strong.tres` keeps the
+alternative it beat, and Tab still swaps them live because M14 retunes
+everything. `config/world.tres` holds hero size and tier height,
+`config/sword.tres` every number the sword obeys, and `config/death.tres` what
+dying costs.
 
 ## The first attempt
 

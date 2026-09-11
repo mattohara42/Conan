@@ -79,6 +79,9 @@ design back toward the trace. `assets/reference/` is the part worth keeping.
 - Mid-build ideas go to `BACKLOG.md`, never into the current milestone.
 - **`git fetch` before branching**, and branch from `origin/main` rather than
   local `main`. Re-branch after every squash-merge.
+- **Build and test through `tools/dev.sh`** (`import`, `test`, `play`, `shot`).
+  It finds Godot on macOS and Linux, and it is what CI runs, so a command that
+  works there works here. `README.md` has the detail.
 - **`GEMINI_NOTES.md` is required reading before writing any art prompt.**
 - **An assertion proves the code ran, not that the picture is right, so draw the
   thing you measured.** The last project shipped four bugs past green assertions
