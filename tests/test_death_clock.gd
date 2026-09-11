@@ -67,6 +67,23 @@ func test_placement_fires_once_however_long_the_frame_is() -> void:
 	)
 
 
+## The property that matters more than any single boundary: across a whole death,
+## stepped at a real frame rate, the body is placed exactly once. Checked for a
+## zero hold too, which is the case that used to fire zero times and would have
+## handed the controls back with the body still in whatever killed it.
+func test_placement_fires_exactly_once_over_a_whole_death() -> void:
+	var holds: PackedFloat32Array = [HOLD, 0.0]
+	for hold in holds:
+		var elapsed := 0.0
+		var fires := 0
+		for _i in 120:
+			var after := elapsed + 1.0 / 60.0
+			if DeathClock.crosses_placement(elapsed, after, hold):
+				fires += 1
+			elapsed = after
+		check_eq(fires, 1, "a hold of %.2f s places exactly once over 120 frames" % hold)
+
+
 func test_a_zero_hold_still_places_on_the_first_step() -> void:
 	check(DeathClock.crosses_placement(0.0, 0.016, 0.0), "a zero hold places immediately")
 	check(

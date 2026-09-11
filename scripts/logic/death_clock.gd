@@ -46,11 +46,17 @@ static func has_control(elapsed: float, death_hold: float, respawn_freeze: float
 ## True on the one step that crosses the placement edge, so the body is moved to
 ## the checkpoint exactly once however long a frame runs.
 ##
-## A frame longer than `death_hold` still fires it, which is the case a `==`
-## comparison silently drops and the reason this takes both ends of the step.
+## A step covers `[before, after)`: it has crossed the edge when it started at or
+## before it and ended past it. Two cases decide that convention rather than
+## taste. A frame longer than `death_hold` still has to fire, which a `==`
+## comparison silently drops. And a `death_hold` of zero has to fire on the first
+## step, which the other half-open convention (`before < edge`) cannot express at
+## all, because no step ever begins before zero. That one is not academic: with
+## the hold at zero the body would never be placed, and the player would get the
+## controls back standing in whatever killed them, dying forever.
 static func crosses_placement(before: float, after: float, death_hold: float) -> bool:
 	var edge := maxf(death_hold, 0.0)
-	return before < edge and after >= edge
+	return before <= edge and after > edge
 
 
 static func phase_name(phase: Phase) -> String:
