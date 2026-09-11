@@ -73,7 +73,10 @@ and the level geometry to serve it. Concretely, the sword does five things:
 2. **Kill.** It hits an enemy and both die. The sword is gone.
 3. **Embed.** It hits **wood** and sticks, and a stuck sword is **a one-tile
    ledge you can stand on**. This is the move that turns a weapon into a
-   traversal tool, and it is where the puzzles live.
+   traversal tool, and it is where the puzzles live. The art has to read as
+   **bitten into** the wood rather than resting against it by the tip, because
+   a blade that looks balanced on a surface does not look like one that would
+   hold your weight.
 4. **Recall.** Hold the throw button and an embedded sword flies back to you,
    taking its ledge with it. Standing on the ledge you are recalling is a
    legitimate and bad idea.
@@ -117,10 +120,12 @@ to watch for at G1.
 sword, because half of what makes an embedded sword interesting is that it
 extends a jump you could almost make. That was backwards. With a jump that
 cannot reach the next storey, an embedded sword stops being a small extension
-and becomes **one of the two ways to gain height at all**, the other being a
-ladder somebody else put there. In a game whose thesis is that the sword is the
-game, the weak jump is what makes the thesis true in the level geometry rather
-than only in the combat.
+and becomes **a way up that nothing else in the room provides**. In a game whose
+thesis is that the sword is the game, the weak jump is what makes the thesis
+true in the level geometry rather than only in the combat.
+
+That is about what the move is worth, not how often it is asked for. See
+`Structure` below: the sword route is meant to be uncommon.
 
 Ladders are traversal now rather than furniture, and every room plan in
 `Structure` is read with that in mind.
@@ -163,10 +168,21 @@ generator is the act boss and the fight is a circuit, not a damage race.
 original because it is a good ending. Volta himself, then the cage opens and the
 bird finishes it exactly as it did in 1984.
 
-**Vertical movement is climbing and swords.** A 56 px jump crosses gaps and
-steps, and a storey needs a ladder or a sword you embedded in something. A room
-that has neither is a room you cannot leave upward, and that is a puzzle rather
-than an oversight.
+**The jump owns a scale, and it is not the storey.** A 56 px jump is for holes
+in the floor, plinths, low ledges and the short steps between them. Those are
+deliberate furniture and rooms should be full of them, because they are where
+moving stays fun once a storey is off the table.
+
+**Gaining a storey has a vocabulary, and the sword is its rarest entry.** The
+ordinary ways up are ladders, and in Act 2 the geysers that hurl you. **Once in
+a while, where there is wood**, a fallen tree or an interior wall, the way up is
+a blade you throw and then stand on, and working that out is the puzzle.
+
+That move is uncommon on purpose. A room that demanded it every time would turn
+a surprise into a staircase, and the point of it is that the player arrives at
+an unexpected set of navigational furniture, occasionally with a beast on it,
+and has to reason the route out. `BACKLOG.md` holds the other vertical modes
+that have been raised and not judged.
 
 **Gems and keys survive**, but they change meaning. A gem sits behind a distinct
 use of the sword rather than behind a memorised route, and the key is the exit.
@@ -201,15 +217,10 @@ the moment the hero has a different name, and the game becomes an actual
 reimagination rather than a remake wearing a hat. **Volta stays**, being a unit
 of electric potential and a real surname rather than an owned character.
 
-**The hero is Lothar of the Hill People, provisionally.** It arrived as a Mike
-Myers bit and nobody has decided yet whether it is the real name or a
-placeholder wearing one.
-
-That is a tone question rather than a naming one, and it has a deadline. This
-document sets a register (a castle with a lava pit in it, an adult who wants it
-hard) and `ART_DIRECTION.md` sharpens it. A comedy name either cuts against
-that or reframes the whole game as lighter, and **M5 paints him**, so it wants
-answering before a face exists rather than after.
+**The hero is Lothar of the Hill People.** Settled, not provisional. It arrived
+as a Mike Myers bit and it stays, which means the register this document sets (a
+castle with a lava pit in it, an adult who wants it hard) carries a hero whose
+name is a joke and plays it straight. **M5 paints him** to that brief.
 
 ## What the repo inherits from the first attempt
 
