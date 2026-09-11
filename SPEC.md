@@ -201,8 +201,15 @@ the moment the hero has a different name, and the game becomes an actual
 reimagination rather than a remake wearing a hat. **Volta stays**, being a unit
 of electric potential and a real surname rather than an owned character.
 
-**The hero is Lothar of the Hill People.** Settled, and it is what M5 paints and
-what any string a player reads will call him.
+**The hero is Lothar of the Hill People, provisionally.** It arrived as a Mike
+Myers bit and nobody has decided yet whether it is the real name or a
+placeholder wearing one.
+
+That is a tone question rather than a naming one, and it has a deadline. This
+document sets a register (a castle with a lava pit in it, an adult who wants it
+hard) and `ART_DIRECTION.md` sharpens it. A comedy name either cuts against
+that or reframes the whole game as lighter, and **M5 paints him**, so it wants
+answering before a face exists rather than after.
 
 ## What the repo inherits from the first attempt
 
