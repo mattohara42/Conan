@@ -80,7 +80,8 @@ jobs:
           xvfb-run -a ~/godot/godot --path . --resolution 1280x720 \
             --script res://tools/capture.gd -- \
             --scene=res://scenes/rooms/room_m2_switch.tscn --out=room_m2_switch.png \
-            --input="throw:6;-:40" --zoom=0.55 --centre=360,250 --overwrite
+            --input="move_left:10;throw:6;-:40" --zoom=0.55 --centre=220,250 \
+            --overwrite
 
       - name: Keep the screenshots
         uses: actions/upload-artifact@v4
