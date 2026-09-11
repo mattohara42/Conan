@@ -61,6 +61,27 @@ jobs:
             --input="move_left:10;throw:6;-:45" --zoom=0.5 --centre=250,240 \
             --overwrite
 
+      # M2's first room claims it cannot be crossed without standing on your
+      # own sword. tests/test_room_m2_gap.gd asserts that against the config;
+      # this draws it. The player starts at the lip and throws once, so the log
+      # line says where the ledge landed over the gap.
+      - name: Screenshot the ledge over the gap
+        run: |
+          xvfb-run -a ~/godot/godot --path . --resolution 1280x720 \
+            --script res://tools/capture.gd -- \
+            --scene=res://scenes/rooms/room_m2_gap.tscn --out=room_m2_gap.png \
+            --input="throw:6;-:40" --zoom=0.5 --centre=440,250 --overwrite
+
+      # The switch room's chain is sword embeds -> switch senses -> gate opens.
+      # Only the first link is arithmetic; the other two are an area overlap and
+      # a signal, and running it is the only honest way to know they fire.
+      - name: Screenshot the gate a sword opened
+        run: |
+          xvfb-run -a ~/godot/godot --path . --resolution 1280x720 \
+            --script res://tools/capture.gd -- \
+            --scene=res://scenes/rooms/room_m2_switch.tscn --out=room_m2_switch.png \
+            --input="throw:6;-:40" --zoom=0.55 --centre=360,250 --overwrite
+
       - name: Keep the screenshots
         uses: actions/upload-artifact@v4
         with:
@@ -68,3 +89,5 @@ jobs:
           path: |
             room_m0.png
             room_m2_embed.png
+            room_m2_gap.png
+            room_m2_switch.png

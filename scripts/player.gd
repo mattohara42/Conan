@@ -6,10 +6,11 @@
 class_name Player
 extends CharacterBody2D
 
-## The two answers to the jump-versus-ladders question in SPEC.md. Swap between
-## them live with Tab and decide by feel, which is the only way it can be decided.
+## The game's movement, and the alternative it beat. M0 settled the
+## jump-versus-ladders question in SPEC.md by feel: a storey is climbed, not
+## jumped. Tab still swaps them live, which M14 will want.
+@export var preset_climb: MovementConfig
 @export var preset_strong: MovementConfig
-@export var preset_ladders: MovementConfig
 @export var world: WorldConfig
 @export var sword_config: SwordConfig
 @export var sword_scene: PackedScene
@@ -24,6 +25,10 @@ var spawn_point := Vector2.ZERO
 ## dial. A thrown sword is spent the moment it leaves your hand and only comes
 ## back if you catch it or walk to it.
 var swords_held := 0
+## What a respawn restores you to. Normally the config's count, but a room may
+## lower it: M2's switch room needs you to hold exactly one, or recall is not
+## the only way to get your sword back and the puzzle has a second solution.
+var swords_at_spawn := 0
 ## Which way a throw goes. Held rather than derived from velocity, or a standing
 ## player would have no facing to throw along.
 var facing := 1.0
@@ -54,9 +59,10 @@ var _takeoff_y := 0.0
 
 func _ready() -> void:
 	add_to_group("player")
-	config = preset_strong
+	config = preset_climb
 	spawn_point = global_position
-	swords_held = sword_config.starting_swords
+	swords_at_spawn = sword_config.starting_swords
+	swords_held = swords_at_spawn
 	_apply_hero_size(world.hero_height)
 	_ladder_probe.area_entered.connect(func(_a: Area2D) -> void: _ladders_touched += 1)
 	_ladder_probe.area_exited.connect(func(_a: Area2D) -> void: _ladders_touched = maxi(_ladders_touched - 1, 0))
@@ -155,6 +161,13 @@ func _recall_embedded() -> void:
 			sword.recall()
 
 
+## Set by a room that hands out a different number. Also resets what you are
+## holding, since it is called before the room's puzzle has begun.
+func set_swords_at_spawn(count: int) -> void:
+	swords_at_spawn = count
+	swords_held = count
+
+
 ## Spends a sword. The count drops now, not when the throw resolves, because
 ## the sword is out of your hands either way and the decision has been made.
 func _throw() -> void:
@@ -204,11 +217,17 @@ func _apply_hero_size(height: float) -> void:
 
 func _handle_debug_keys() -> void:
 	if Input.is_action_just_pressed("debug_next_preset"):
-		config = preset_ladders if config == preset_strong else preset_strong
+		config = preset_strong if config == preset_climb else preset_climb
 	if Input.is_action_just_pressed("debug_respawn"):
 		global_position = spawn_point
 		velocity = Vector2.ZERO
 		peak_height = 0.0
+		# Swords come back too, or a bench with a sword puzzle in it needs the
+		# scene reloading every time you spend one badly. SPEC.md says a real
+		# death does this as well; M3 owns that.
+		swords_held = swords_at_spawn
+		for node in get_tree().get_nodes_in_group("swords"):
+			node.queue_free()
 	var step := 0
 	if Input.is_action_just_pressed("debug_size_up"):
 		step = 1

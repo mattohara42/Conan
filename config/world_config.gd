@@ -5,8 +5,9 @@ class_name WorldConfig
 extends Resource
 
 ## Hero height in design px against a 640x360 design resolution.
-## ART_DIRECTION.md puts this at around 40 and says so is the number most likely
-## to be wrong. M0 settles it with a grey capsule.
+## ART_DIRECTION.md called this the number most likely to be wrong. M0 settled
+## it by cycling 28 / 34 / 40 / 46 / 54 in a running build: 40 is right, and M5
+## paints Lothar at that height.
 @export var hero_height: float = 40.0
 ## Hero width. Silhouette reads better narrower than half its height.
 @export var hero_width: float = 18.0

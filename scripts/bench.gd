@@ -45,6 +45,35 @@ func _add_wood(rect: Rect2) -> void:
 	_woods.append(rect)
 
 
+## A switch, sized to `rect`, with its detection area grown past the block so a
+## sword resting against its face registers. It is wood, so a throw bites it.
+func _add_switch(rect: Rect2) -> SwordSwitch:
+	_add_wood(rect)
+	var switch := SwordSwitch.new()
+	switch.configure(rect.size)
+	switch.position = rect.get_center()
+	add_child(switch)
+	return switch
+
+
+## A gate. Solid until something opens it, and it is the room that decides what.
+func _add_gate(rect: Rect2) -> Gate:
+	var gate := Gate.new()
+	gate.configure(rect.size)
+	gate.position = rect.get_center()
+	add_child(gate)
+	return gate
+
+
+## How many swords this room hands you, for a room whose puzzle depends on the
+## count. Call it from `_ready`: the player is a child, so it is already up.
+func _hand_out_swords(count: int) -> void:
+	for node in get_tree().get_nodes_in_group("player"):
+		var player := node as Player
+		if player != null:
+			player.set_swords_at_spawn(count)
+
+
 ## `top` is the surface the ladder serves; it is drawn reaching above that.
 func _add_ladder(x: float, top: float, bottom: float) -> void:
 	var rect := Rect2(x, top - LADDER_OVERSHOOT, LADDER_WIDTH, bottom - top + LADDER_OVERSHOOT)

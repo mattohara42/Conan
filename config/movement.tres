@@ -4,15 +4,15 @@
 
 [resource]
 script = ExtResource("1_movement")
-preset_name = "strong"
-note = "SPEC.md's answer. The jump is strong and steerable, it clears a tier on its own, and a full-speed jump covers about 130 px of gap. Ladders are furniture here, not traversal."
+preset_name = "climb"
+note = "The game's movement, settled by feel in M0. Jump height is 56 px against a 96 px tier, so a storey is climbed and never jumped, and the jump is for gaps, short steps and reaching a sword you embedded. time_to_apex is 0.2546 rather than 0.36 so that derived gravity stays at 1728 px/s^2 and jump height is the only variable against config/movement_strong.tres, which is the alternative this beat. Everything else is identical to that file on purpose: change a number here and change it there too, or the comparison stops meaning anything."
 max_run_speed = 200.0
 ground_accel = 1600.0
 ground_friction = 2400.0
 air_accel = 1200.0
 air_friction = 400.0
-jump_height = 112.0
-time_to_apex = 0.36
+jump_height = 56.0
+time_to_apex = 0.2546
 fall_gravity_multiplier = 1.6
 jump_release_damping = 0.4
 max_fall_speed = 700.0
