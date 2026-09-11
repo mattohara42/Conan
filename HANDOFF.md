@@ -10,51 +10,54 @@ measured, and dying twenty times in a row is annoying but not tedious.
 
 ## Where this is
 
-**M0, M1 and M2 all meet their done-when. M3 has not been started**: no hazard,
-no brazier and no death loop exist yet. `BUILD_PLAN.md` has its contents.
+**M3's done-when is already met, on the death loop alone.** Measured at 0.417 s
+in a real build, and played: dying repeatedly is not annoying. The milestone
+stays open because its hazard list does not: **only lava exists.**
 
-The toolchain is pinned to **Godot 4.7.2**, in CI and `README.md`, so the
-screenshot guard runs the build a human plays on. The pin was checked rather
-than assumed: every logged sword landing is identical between 4.7.1 and 4.7.2.
+Still to build: spikes, geysers, moving and falling platforms, and **braziers as
+checkpoints**. The braziers are the interesting one, being the first thing that
+moves `spawn_point` rather than leaving it where the player started.
 
-`tools/dev.sh test` is **67 tests, 309 checks, 0 failed**, and that same count
-passes on CI's headless Linux and on a windowed macOS build. A lower count means
-the run did not pick up every file.
+Lava reads as lava, confirmed by looking. It is a flat rectangle standing in for
+the shader M9 owns.
 
 ## The next action
 
-**Build the death timer before any hazard exists to die to.** M3 is the only
-milestone whose done-when carries a number, and instrumenting it now is cheap
-where retrofitting it onto a finished death loop is not.
+**Braziers before the other hazards.** Everything else is a variation on lava
+(an area that kills), and a checkpoint is the only piece that changes what a
+death means. Building it last would mean retuning the loop twice.
 
 ## Blocked on Matt
 
 1. **Wood's colour.** `ART_DIRECTION.md` says deep darks are warm umber in wood
    and also that anything you stand on is cold and matte. M2 wood is both. Read
    as warm in hue, matte in saturation. Two constants in `Palette` to change. It
-   blocks nothing in M3 and it is the only open question in the repo.
+   blocks nothing and it is the only open question in the repo.
 
 ## Traps that will bite again
 
 **Opening the project rewrites `project.godot`, and a stale editor deletes from
-it.** An editor holding settings older than the checkout writes that older state
-back: one save dropped the whole `[physics]` and `[rendering]` sections, taking
-engine gravity from 0 to 980 and the renderer to forward_plus. Close the editor,
-read `git diff project.godot`, restore it, then pull.
-`tests/test_project_settings.gd` now fails on that specific loss, but the
-header comment is not covered and `tools/dev.sh import` can dirty the file too.
-M3 adds input actions to this same file.
+it.** One save dropped the whole `[physics]` and `[rendering]` sections, taking
+engine gravity from 0 to 980. Close the editor, read `git diff project.godot`,
+restore it, then pull. `tests/test_project_settings.gd` catches that specific
+loss and not every one. M3 adds input actions to this file and has not yet.
 
-**CI throws a sword into wood, screenshots it, and logs where it landed.** Four
-M2 geometry bugs got past green assertions and every one was caught by arithmetic
-on paper or a number out of a running build. That log line is the cheapest guard
-in the repo.
+**CI runs the game and logs what happened**: where a thrown sword landed, and
+the measured death loop. Four M2 geometry bugs got past green assertions and
+every one was caught by a number out of a running build. Read those lines.
+
+**Docs go stale silently.** Two cost real work this week: a `HANDOFF.md` read
+through six merges, and a `SPEC.md` claim about the reference set written from
+memory. `.claude/hooks/` now warns on both a checkout behind `origin/main` and a
+branch that commits code without touching this file.
 
 ## Settled, do not relitigate
 
+**M3:** the loop is 0.25 s hold plus 0.15 s freeze, measured at 0.417 s, and it
+feels right. Death messages are centred, large, and outlast the respawn.
+
 **M2:** standing on a thrown sword and recall-on-hold both feel right as built.
-The sword ledge is 16 px against an 18 px hero and that margin is fine. Playing
-it corrected `SPEC.md` on what the jump owns and how rare the sword stair is.
+The sword ledge is 16 px against an 18 px hero and that margin is fine.
 
 **M1:** you miss by changing height, a catch beats a solid hit in the same frame,
 and only flight destroys a sword (a spent one lands).
