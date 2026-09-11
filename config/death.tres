@@ -7,4 +7,5 @@ script = ExtResource("1_death")
 death_hold = 0.25
 respawn_freeze = 0.15
 message_seconds = 2.2
+message_font_size = 24
 restore_swords = true

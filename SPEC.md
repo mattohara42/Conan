@@ -154,9 +154,9 @@ LASSITUDE" is the register). **The tradition is kept and the box is not.**
 
 A box you stop and read costs about two seconds, and the one second above is the
 whole modernisation, so a faithful box would trade away the thing this game is
-for. Instead the line appears as you die and **lingers past the respawn**, still
-on screen while you are already running. It costs nothing, and reading it is
-optional in a way the original's was not.
+for. Instead the line appears **centred and large** as you die, and **lingers past
+the respawn**, fading out while you are already running. It costs nothing, and
+reading it is optional in a way the original's was not.
 
 **The lines are ours.** `CLAUDE.md` forbids shipping anything out of
 `assets/reference/`, so none of the four is used: the fifteen in

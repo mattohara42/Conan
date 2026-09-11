@@ -73,6 +73,7 @@ var climbing := false
 var peak_height := 0.0
 var _takeoff_y := 0.0
 
+@onready var _message_label: Label = $DeathMessage/Label
 @onready var _shape: CollisionShape2D = $CollisionShape2D
 @onready var _ladder_probe: Area2D = $LadderProbe
 @onready var _probe_shape: CollisionShape2D = $LadderProbe/CollisionShape2D
@@ -85,6 +86,9 @@ func _ready() -> void:
 	swords_at_spawn = sword_config.starting_swords
 	swords_held = swords_at_spawn
 	_apply_hero_size(world.hero_height)
+	_message_label.add_theme_font_size_override("font_size", death_config.message_font_size)
+	_message_label.add_theme_color_override("font_color", Palette.FIRE_HOT)
+	_message_label.text = ""
 	_ladder_probe.area_entered.connect(func(_a: Area2D) -> void: _ladders_touched += 1)
 	_ladder_probe.area_exited.connect(func(_a: Area2D) -> void: _ladders_touched = maxi(_ladders_touched - 1, 0))
 
@@ -95,6 +99,7 @@ func _physics_process(delta: float) -> void:
 	# Ticked before the dead branch returns, or the message would freeze on screen
 	# for the length of the hold and then vanish the instant you could move.
 	_message_timer = maxf(_message_timer - delta, 0.0)
+	_update_message()
 
 	# Before the input reads, not after. A dead player who still gets a frame of
 	# steering is the bug this ordering exists to prevent.
@@ -388,25 +393,20 @@ func _draw() -> void:
 	)
 	# A facing mark, so "which way am I pointing" is answerable at 40 px.
 	draw_circle(Vector2(facing * r * 0.4, top + r * 0.2), r * 0.22, Palette.STONE_DEEP)
-	_draw_message(h)
 
 
-## The death message, over the hero's head and following him to the checkpoint,
-## which is what lets it outlast the respawn without costing any time. Fades out
-## over its last half second rather than vanishing.
-func _draw_message(height: float) -> void:
+## The death message, centred on the screen and large enough to take in at a
+## glance. It lives on its own CanvasLayer, so it ignores the camera and holds
+## still while the body is placed back at the checkpoint underneath it, which is
+## what lets it outlast the loop without costing any of SPEC.md's one second.
+##
+## It fades over its last third rather than vanishing. Derived from
+## `message_seconds` rather than being its own number, so retuning how long the
+## line lingers retunes how long it takes to leave.
+func _update_message() -> void:
 	if _message_timer <= 0.0 or message_index < 0:
+		_message_label.text = ""
 		return
-	var text := DeathMessages.message_at(message_index)
-	if text.is_empty():
-		return
-	var alpha := minf(_message_timer / 0.5, 1.0)
-	draw_string(
-		ThemeDB.fallback_font,
-		Vector2(-120.0, -height * 0.5 - 14.0),
-		text,
-		HORIZONTAL_ALIGNMENT_CENTER,
-		240.0,
-		10,
-		Color(Palette.FIRE_HOT, alpha)
-	)
+	_message_label.text = DeathMessages.message_at(message_index)
+	var fade := maxf(death_config.message_seconds / 3.0, 0.01)
+	_message_label.modulate = Color(1.0, 1.0, 1.0, clampf(_message_timer / fade, 0.0, 1.0))

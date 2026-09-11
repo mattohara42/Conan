@@ -23,6 +23,10 @@ extends Resource
 ## the loop itself: the line is still there once you have the controls back, so
 ## reading it costs nothing. Set it to zero to turn the messages off.
 @export var message_seconds: float = 2.2
+## Point size of the death message, against a 640x360 viewport. It is centred on
+## the screen and meant to be read at a glance while you are already running, so
+## it is a good deal larger than anything else the game draws.
+@export var message_font_size: int = 24
 
 @export_group("What comes back")
 ## Whether a respawn restores the swords you had spent. SPEC.md says it does:

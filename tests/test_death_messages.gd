@@ -83,6 +83,24 @@ func test_the_top_of_the_roll_range_stays_inside_the_bag() -> void:
 	check_eq(DeathMessages.slot_for(0.5, 0), -1, "an empty bag has no slot to take")
 
 
+## Centred on a 640x360 viewport, so a size that fits the longest line matters.
+## At roughly half the point size in pixels per character, 32 characters at 24 pt
+## is about 384 px, which clears 640 with room either side.
+func test_the_message_is_large_enough_to_read_and_narrow_enough_to_fit() -> void:
+	var config: DeathConfig = load(DEATH)
+	check(
+		config.message_font_size >= 16,
+		"the message is %d pt, and smaller than 16 is not a glance" % config.message_font_size
+	)
+	var widest := float(DeathMessages.MAX_LENGTH) * float(config.message_font_size) * 0.5
+	check(
+		widest < 640.0,
+		"the longest line at %d pt is about %.0f px wide against a 640 px viewport" % [
+			config.message_font_size, widest
+		]
+	)
+
+
 func test_the_message_outlasts_the_loop() -> void:
 	var config: DeathConfig = load(DEATH)
 	var loop := DeathClock.downtime(config.death_hold, config.respawn_freeze)
