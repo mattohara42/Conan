@@ -146,6 +146,27 @@ retried before you have finished being annoyed.
 **Nothing is a difficulty option in v1.** One ruleset. A kid-forgiving mode is
 in `BACKLOG.md` and stays there until the game exists.
 
+### The death messages, which are kept
+
+The original named each death: fifteen short, mock-heroic lines drawn in a box
+over the level. Four survive in `assets/reference/c64/` ("YOU SUCCUMB TO
+LASSITUDE" is the register). **The tradition is kept and the box is not.**
+
+A box you stop and read costs about two seconds, and the one second above is the
+whole modernisation, so a faithful box would trade away the thing this game is
+for. Instead the line appears **centred and large** as you die, and **lingers past
+the respawn**, fading out while you are already running. It costs nothing, and
+reading it is optional in a way the original's was not.
+
+**The lines are ours.** `CLAUDE.md` forbids shipping anything out of
+`assets/reference/`, so none of the four is used: the fifteen in
+`scripts/logic/death_messages.gd` are written to that register rather than taken
+from it. They rotate from a bag, so all fifteen are seen before any repeats,
+which matters in a game built to be died in.
+
+**The hero being Lothar of the Hill People is doing work here.** A name that is
+a joke played straight is exactly the register these lines want.
+
 ## Structure
 
 Four acts, roughly 18 rooms. Each act introduces one new thing the sword does
@@ -233,7 +254,7 @@ seven boards actually contained, and `apple2/cast-of-characters.png` and
 | platform | count | native | use |
 |---|---|---|---|
 | `sharp-x1` | 17 | 640x400 | **the useful set.** Cleanest, highest res, full level run plus the ending |
-| `c64` | 18 | 320x200 | the complete death and HUD set, including the 15 death messages |
+| `c64` | 18 | 320x200 | the HUD, and **four of the original's fifteen death messages** |
 | `apple2` | 11 | 560x384 | the cast sheet and the objects legend |
 | `atari-8-bit` | 7 | ~336x240 | title, start, a couple of layouts |
 

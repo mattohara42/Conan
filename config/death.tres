@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="DeathConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://config/death_config.gd" id="1_death"]
+
+[resource]
+script = ExtResource("1_death")
+death_hold = 0.25
+respawn_freeze = 0.15
+message_seconds = 2.2
+message_font_size = 24
+restore_swords = true
