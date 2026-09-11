@@ -80,6 +80,18 @@ static func jump_reach(
 	return run_speed * (time_to_apex + sqrt(2.0 * (height - rise) / falling))
 
 
+## How much floor it takes to accelerate from a standstill to `run_speed`.
+##
+## The number a checkpoint is placed against: land a respawn too close to the
+## jump it has to clear and the room is unfinishable from its own checkpoint,
+## which is a worse bug than no checkpoint at all because it only shows up after
+## you have already died once.
+static func run_up_distance(run_speed: float, accel: float) -> float:
+	if accel <= 0.0:
+		return 0.0
+	return (run_speed * run_speed) / (2.0 * accel)
+
+
 ## Releasing jump while still rising cuts the climb short. This is what makes
 ## jump height variable by hold duration without a second jump state.
 static func damp_on_release(velocity_y: float, damping: float) -> float:

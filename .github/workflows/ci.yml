@@ -96,6 +96,20 @@ jobs:
             --input="move_right:100;-:60" --zoom=0.55 --centre=350,220 \
             --overwrite
 
+      # The checkpoint is the one thing in M3 that changes what a death means,
+      # and whether a brazier lit is an area overlap: no assertion can reach it.
+      # This crosses the easy gap, walks past the second brazier, falls in the
+      # marginal gap and waits out the loop, so the log says which braziers are
+      # lit and where the respawn actually put the player. A checkpoint line
+      # reading 60 rather than 470 is the bug this step exists to catch.
+      - name: Screenshot a respawn at a brazier
+        run: |
+          xvfb-run -a ~/godot/godot --path . --resolution 1280x720 \
+            --script res://tools/capture.gd -- \
+            --scene=res://scenes/rooms/room_m3.tscn --out=room_m3_brazier.png \
+            --input="move_right:86;move_right,jump:20;move_right:120;-:45" \
+            --zoom=1.0 --centre=470,250 --overwrite
+
       - name: Keep the screenshots
         uses: actions/upload-artifact@v4
         with:
@@ -106,3 +120,4 @@ jobs:
             room_m2_gap.png
             room_m2_switch.png
             room_m3.png
+            room_m3_brazier.png

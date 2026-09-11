@@ -55,3 +55,44 @@ func test_the_gaps_do_not_overlap_the_floor() -> void:
 		RoomM3.MARGINAL_GAP.y < RoomM3.ROOM_WIDTH,
 		"there is floor past the last gap to land on"
 	)
+
+
+## The checkpoint has to be past the first gap, or a death at the second one
+## charges you for a jump you already made. That is the whole reason braziers
+## exist and it is one comparison.
+func test_the_mid_brazier_banks_the_first_gap() -> void:
+	check(
+		RoomM3.MID_BRAZIER_X > RoomM3.EASY_GAP.y,
+		"the mid brazier is at %.0f, past the easy gap which ends at %.0f" % [
+			RoomM3.MID_BRAZIER_X, RoomM3.EASY_GAP.y
+		]
+	)
+	check(
+		RoomM3.MID_BRAZIER_X < RoomM3.MARGINAL_GAP.x,
+		"the mid brazier is before the marginal gap, which is the one you die at"
+	)
+
+
+## A checkpoint you cannot make the next jump from is worse than no checkpoint,
+## because you only find that out after you have already died once. The respawn
+## stands still, so the floor between it and the gap has to be long enough to
+## accelerate across.
+func test_the_marginal_gap_is_still_jumpable_from_the_mid_brazier() -> void:
+	var move: MovementConfig = load("res://config/movement.tres")
+	var run_up := RoomM3.MARGINAL_GAP.x - RoomM3.MID_BRAZIER_X
+	var needed := Motion.run_up_distance(move.max_run_speed, move.ground_accel)
+	check(
+		run_up > needed,
+		"the respawn has %.0f px of floor before the gap and needs %.0f to reach full speed" % [
+			run_up, needed
+		]
+	)
+
+
+## The start brazier is where the room puts you, so the first frame of the room
+## already has a checkpoint in it.
+func test_the_start_brazier_is_at_the_start() -> void:
+	check(
+		RoomM3.START_BRAZIER_X < RoomM3.EASY_GAP.x,
+		"the start brazier is on the first run of floor"
+	)

@@ -65,6 +65,22 @@ func _add_lava(rect: Rect2) -> Hazard:
 	return hazard
 
 
+## A brazier standing on the floor at `base`, which is a point on a surface and
+## not a rectangle: a brazier has no extent you can collide with, only a place
+## it stands and a zone that notices you went past.
+func _add_brazier(base: Vector2) -> Brazier:
+	var brazier := Brazier.new()
+	brazier.configure()
+	brazier.position = base
+	add_child(brazier)
+	# Behind the hero. A room's own `_draw` runs before any child, so the only
+	# thing child order decides is which mechanism paints over which, and a
+	# brazier bowl is at chest height: left last in the list it hides the hero
+	# standing at the checkpoint it just put them at.
+	move_child(brazier, 0)
+	return brazier
+
+
 ## A switch, sized to `rect`, with its detection area grown past the block so a
 ## sword resting against its face registers. It is wood, so a throw bites it.
 func _add_switch(rect: Rect2) -> SwordSwitch:
