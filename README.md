@@ -43,13 +43,18 @@ first thing to read at the start of a session.
 
 ## Running it
 
-Godot 4.7.1, no addons and no build step. Open the project and press play, or:
+Godot 4.7.1, no addons and no build step. Open the project and press play, or
+drive it through one script that finds Godot on macOS and Linux for you:
 
 ```
-godot --path . --import                          # once, after a fresh clone
-godot --path .                                   # play the benches, F2 cycles
-godot --headless --path . --script res://tests/run_tests.gd
+tools/dev.sh import                              # once, after a fresh clone
+tools/dev.sh play                                # the benches, F2 cycles
+tools/dev.sh test                                # headless assertions
 ```
+
+Set `GODOT` if it is somewhere unusual. The script wraps `godot --path .`,
+`godot --path . --import` and `godot --headless --path . --script
+res://tests/run_tests.gd`, so any of those still work typed out in full.
 
 The tests are a plain script, not a framework. They find `tests/test_*.gd`, run
 every method named `test_*`, and exit non-zero on a failure.
@@ -58,11 +63,23 @@ To take a screenshot from a real running build, which is the only way to check
 anything visual (see `CLAUDE.md`):
 
 ```
-xvfb-run -a godot --path . --resolution 1280x720 --script res://tools/capture.gd -- \
-    --scene=res://scenes/rooms/room_m0.tscn --out=room.png --zoom=0.38 --centre=800,180
+tools/dev.sh shot res://scenes/rooms/room_m0.tscn room.png --zoom=0.38 --centre=800,180
 ```
 
-`--overwrite` is required to replace an existing file.
+`--overwrite` is required to replace an existing file. On Linux this goes
+through `xvfb-run`, on macOS it does not, and `tools/capture.gd` documents
+`--input` and `--until-apex` for capturing a pose mid-motion.
+
+## Working on it with Claude
+
+`.claude/` carries the local workflow: a SessionStart hook that reads the active
+milestone out of `HANDOFF.md`, `/milestone`, `/shot` and `/handoff`, and a
+permission allowlist so the build commands do not prompt. Personal overrides go
+in `.claude/settings.local.json`, which is ignored.
+
+**Feel criteria need a human playing the game**, so Phase 1 belongs on a real
+machine rather than in a cloud session. Doc passes, `scripts/logic/` work and
+test writing are headless-verifiable and travel fine.
 
 ## Where the numbers live
 
