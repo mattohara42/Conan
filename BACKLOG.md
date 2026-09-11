@@ -23,6 +23,28 @@ committed to.
   3 turns out thin.
 - **The avian ally as a mid-game traversal tool** rather than only the ending.
   Risk: it is a second verb, and the game is about having one.
+- **Two kinds of switch: floor plates and wall switches.** A plate you stand on,
+  or shove something onto, or leave an enemy on; and a wall switch you push or
+  throw a blade into. Raised while playing M2, right after its switch turned out
+  to read as a crate.
+
+  **A floor plate is self-teaching in a way a wall fixture never is.** Weight on
+  a plate is a thing every player already understands, and it needs no gold
+  paint to say so. That alone is a strong argument for it.
+
+  M2's switch is the wall kind, and it is the kind that milestone needs: its
+  puzzle is a blade held in a socket and then recalled out of it, which a plate
+  cannot do. What would make the existing one read better today is **mounting it
+  in a wall** rather than standing it on the floor, which is a room change and
+  not a mechanic change.
+
+  Plates want things M2 does not have. "Move something onto it" means pushable
+  objects, which are nowhere in SPEC.md. "Leave an enemy on it" means M4, and it
+  is a genuinely good idea: an enemy as a tool rather than an obstacle is the
+  sort of thing that makes a roster earn its place. Act 3 already owns a switch
+  vocabulary (SPEC.md: switches that need current and not impact), so that is
+  the natural home for a second kind.
+
 - **Sword abilities as upgrades**, rather than all five from the first room.
   Recall, and embedding as a standable platform, become things you earn: better
   throwing, a potion, gold spent somewhere. Raised while playing M2, from the
