@@ -56,6 +56,13 @@ var last_downtime := 0.0
 ## M3's done-when and counting them is how you know you did.
 var deaths := 0
 
+## The death message, which the 1984 original had fifteen of. The bag is what
+## makes the rotation unique: every line is seen once before any repeats.
+## `message_index` is read by `_draw` and by the overlay.
+var message_index := -1
+var _message_bag: PackedInt32Array = []
+var _message_timer := 0.0
+
 # Ladders currently overlapping the body.
 var _ladders_touched := 0
 ## Read by the debug overlay.
@@ -84,6 +91,10 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_handle_debug_keys()
+
+	# Ticked before the dead branch returns, or the message would freeze on screen
+	# for the length of the hold and then vanish the instant you could move.
+	_message_timer = maxf(_message_timer - delta, 0.0)
 
 	# Before the input reads, not after. A dead player who still gets a frame of
 	# steering is the bug this ordering exists to prevent.
@@ -196,7 +207,25 @@ func die() -> void:
 	velocity = Vector2.ZERO
 	climbing = false
 	deaths += 1
+	_draw_a_message()
 	queue_redraw()
+
+
+## Takes one line from the bag, refilling it when it runs dry. The message
+## outlasts the loop on purpose: it is still on screen once you have the
+## controls back, so reading it costs none of SPEC.md's one second.
+func _draw_a_message() -> void:
+	if death_config.message_seconds <= 0.0:
+		message_index = -1
+		return
+	_message_bag = DeathMessages.refill_if_empty(_message_bag, DeathMessages.count())
+	var slot := DeathMessages.slot_for(randf(), _message_bag.size())
+	if slot < 0:
+		message_index = -1
+		return
+	message_index = _message_bag[slot]
+	_message_bag.remove_at(slot)
+	_message_timer = death_config.message_seconds
 
 
 ## One physics step of being dead. `move_and_slide` is deliberately not called,
@@ -359,3 +388,25 @@ func _draw() -> void:
 	)
 	# A facing mark, so "which way am I pointing" is answerable at 40 px.
 	draw_circle(Vector2(facing * r * 0.4, top + r * 0.2), r * 0.22, Palette.STONE_DEEP)
+	_draw_message(h)
+
+
+## The death message, over the hero's head and following him to the checkpoint,
+## which is what lets it outlast the respawn without costing any time. Fades out
+## over its last half second rather than vanishing.
+func _draw_message(height: float) -> void:
+	if _message_timer <= 0.0 or message_index < 0:
+		return
+	var text := DeathMessages.message_at(message_index)
+	if text.is_empty():
+		return
+	var alpha := minf(_message_timer / 0.5, 1.0)
+	draw_string(
+		ThemeDB.fallback_font,
+		Vector2(-120.0, -height * 0.5 - 14.0),
+		text,
+		HORIZONTAL_ALIGNMENT_CENTER,
+		240.0,
+		10,
+		Color(Palette.FIRE_HOT, alpha)
+	)

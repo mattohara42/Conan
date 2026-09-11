@@ -18,6 +18,12 @@ extends Resource
 ## so a held direction does not walk you straight back into what killed you.
 @export var respawn_freeze: float = 0.15
 
+@export_group("The message")
+## How long the death message stays on screen, seconds. It deliberately outlasts
+## the loop itself: the line is still there once you have the controls back, so
+## reading it costs nothing. Set it to zero to turn the messages off.
+@export var message_seconds: float = 2.2
+
 @export_group("What comes back")
 ## Whether a respawn restores the swords you had spent. SPEC.md says it does:
 ## arriving at a checkpoint empty is the punishment the modernisation removes.
