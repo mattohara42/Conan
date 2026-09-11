@@ -21,6 +21,23 @@ committed to.
 - **Ricochet off metal surfaces**, for angle puzzles. Listed in `SPEC.md` as one
   of the sword's five behaviours but cut down to four for v1. Add it only if Act
   3 turns out thin.
+- **More ways up than ladders**: magical portals, elevators, and geysers used as
+  traversal rather than only as hazards. Raised when the two-scale rule went into
+  `SPEC.md`: the jump owns holes, plinths and short steps, a storey needs
+  something else, and right now that something else is almost always a ladder.
+  A single answer to every vertical problem is monotonous in a game whose pitch
+  is reasoning through unexpected furniture.
+
+  **Geysers are the cheap one and are already in `SPEC.md`** as an Act 2 hazard
+  that hurls you. Using one deliberately as a route costs no new system, only a
+  room built to mean it. Portals and elevators are new systems, and a new system
+  in a one-verb game is the exact scope risk that killed the first attempt, so
+  neither is committed to.
+
+  Judge this after G1, when it is known whether climbing is as dull as
+  `SPEC.md` warns it might be. If it is, this is the fix. If it is not, ladders
+  and geysers are enough.
+
 - **The avian ally as a mid-game traversal tool** rather than only the ending.
   Risk: it is a second verb, and the game is about having one.
 - **Two kinds of switch: floor plates and wall switches.** A plate you stand on,
