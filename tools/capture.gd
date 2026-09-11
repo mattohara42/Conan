@@ -147,9 +147,12 @@ class CaptureAgent:
 			Input.action_release("jump")
 
 		if player != null:
-			print("capture: player at %s, peak %.1f px" % [player.global_position, player.peak_height])
+			print("capture: player at %s, peak %.1f px, checkpoint %s" % [
+				player.global_position, player.peak_height, player.spawn_point
+			])
 			_report_deaths(player)
 		_report_swords()
+		_report_braziers()
 		_report_mechanisms()
 
 		await RenderingServer.frame_post_draw
@@ -196,6 +199,20 @@ class CaptureAgent:
 			if sword != null:
 				print("capture: sword %s at %s" % [
 					SwordFlight.state_name(sword.state), sword.global_position
+				])
+
+
+	## Whether the braziers are lit.
+	##
+	## The checkpoint on the player line says where a death would put you. This
+	## says which brazier put it there, which is the only way to tell a brazier
+	## that lit from a brazier whose sensing box the hero ran straight through.
+	func _report_braziers() -> void:
+		for node in get_tree().get_nodes_in_group("braziers"):
+			var brazier := node as Brazier
+			if brazier != null:
+				print("capture: brazier at %s %s" % [
+					brazier.global_position, "LIT" if brazier.is_lit else "dark"
 				])
 
 

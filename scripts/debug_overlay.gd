@@ -64,6 +64,20 @@ func _swords_in_play() -> String:
 	return ", ".join(states)
 
 
+## How many braziers are lit, out of how many the room has. The checkpoint
+## position on its own cannot tell you whether the one you just ran past took.
+func _braziers_lit() -> String:
+	var braziers := get_tree().get_nodes_in_group("braziers")
+	if braziers.is_empty():
+		return "no braziers here"
+	var lit := 0
+	for node in braziers:
+		var brazier := node as Brazier
+		if brazier != null and brazier.is_lit:
+			lit += 1
+	return "%d of %d braziers lit" % [lit, braziers.size()]
+
+
 func _state_of(player: Player) -> String:
 	if player.is_dead():
 		return DeathClock.phase_name(player.death_phase())
@@ -102,6 +116,9 @@ func _process(_delta: float) -> void:
 		],
 		"last jump   %.0f px apex   %s" % [_player.peak_height, cleared],
 		"swords      %d held   %s" % [_player.swords_held, _swords_in_play()],
+		"checkpoint  %.0f, %.0f   %s" % [
+			_player.spawn_point.x, _player.spawn_point.y, _braziers_lit()
+		],
 		"deaths      %d   last loop %s   budget %.2f s" % [
 			_player.deaths,
 			"none yet" if _player.deaths == 0 else "%.3f s" % _player.last_downtime,

@@ -20,7 +20,13 @@ extends CharacterBody2D
 const HERO_HEIGHT_STEPS: PackedFloat32Array = [28.0, 34.0, 40.0, 46.0, 54.0]
 
 var config: MovementConfig
+## Where the next death puts you. Starts as wherever the room placed you and
+## moves only when a brazier is lit, which is the only thing in the game that
+## touches it.
 var spawn_point := Vector2.ZERO
+## Read by the debug overlay. How many braziers have been lit, so "did that one
+## take" is answerable by looking rather than by dying to find out.
+var checkpoints_lit := 0
 
 ## Ammunition. SPEC.md: three swords, cap five, and the count is the difficulty
 ## dial. A thrown sword is spent the moment it leaves your hand and only comes
@@ -278,6 +284,15 @@ func death_phase() -> DeathClock.Phase:
 	return DeathClock.phase_at(
 		_death_elapsed, death_config.death_hold, death_config.respawn_freeze
 	)
+
+
+## Banks a checkpoint. Called by a `Brazier` the moment it lights, and by
+## nothing else: SPEC.md has exactly one way to move where a death costs you
+## from. `base` is the floor point the brazier stands on, and `Checkpoints` owns
+## turning that into a position a hero of this height stands at.
+func light_checkpoint(base: Vector2) -> void:
+	spawn_point = Checkpoints.stand_point(base, world.hero_height)
+	checkpoints_lit += 1
 
 
 ## Set by a room that hands out a different number. Also resets what you are
