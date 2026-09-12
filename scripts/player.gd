@@ -271,18 +271,20 @@ func _place_at_checkpoint(restore_swords: bool) -> void:
 		swords_held = swords_at_spawn
 	for node in get_tree().get_nodes_in_group("swords"):
 		node.queue_free()
-	# Every falling platform back at home, now. M3's bargain is that a death
-	# costs you the jump you missed and nothing else, and arriving to find the
-	# route still missing two of its steps is a second cost: it is the wait that
+	# Every platform back at the start of its clock, now: a slab that let go
+	# back at home, a ferry back at the dock you respawn beside. M3's bargain is
+	# that a death costs you the jump you missed and nothing else, and arriving
+	# to find the route still missing two of its steps, or the only way across
+	# still out in the middle of the moat, is a second cost. It is the wait that
 	# turns dying twenty times from annoying into tedious.
 	#
 	# The hero reaching into a room's mechanisms is the same shape as the line
 	# above it, and `BACKLOG.md` says what to do about both when there is a
 	# third one.
 	for node in get_tree().get_nodes_in_group("platforms"):
-		var platform := node as FallingPlatform
+		var platform := node as Platform
 		if platform != null:
-			platform.reset()
+			platform.reset(death_config.respawn_freeze)
 
 
 func is_dead() -> bool:

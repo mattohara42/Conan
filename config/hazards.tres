@@ -12,3 +12,5 @@ platform_fall_gravity = 1400.0
 platform_return_time = 0.8
 platform_shake = 1.5
 platform_shake_hz = 16.0
+platform_travel_speed = 110.0
+platform_wait_time = 0.7
