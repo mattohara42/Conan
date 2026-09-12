@@ -153,6 +153,7 @@ class CaptureAgent:
 			_report_deaths(player)
 		_report_swords()
 		_report_braziers()
+		_report_hazards()
 		_report_mechanisms()
 
 		await RenderingServer.frame_post_draw
@@ -213,6 +214,22 @@ class CaptureAgent:
 			if brazier != null:
 				print("capture: brazier at %s %s" % [
 					brazier.global_position, "LIT" if brazier.is_lit else "dark"
+				])
+
+
+	## Where every hazard is and how big the box that kills actually is.
+	##
+	## A screenshot shows lava and it shows spikes, and in both cases it shows
+	## the drawing rather than the box. For lava those are the same rectangle.
+	## For a spike bed they are deliberately not: the box is half a tooth in
+	## from each end and starts below the points, so the picture cannot tell you
+	## whether the inset is the one that was intended. This line can.
+	func _report_hazards() -> void:
+		for node in get_tree().get_nodes_in_group("hazards"):
+			var hazard := node as Hazard
+			if hazard != null:
+				print("capture: hazard at %s, killing box %s" % [
+					hazard.global_position, hazard.killing_box
 				])
 
 

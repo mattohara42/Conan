@@ -8,6 +8,9 @@ class_name Bench
 extends Node2D
 
 @export var world: WorldConfig
+## Only the benches that place a spike bed wire this. Lava needs no shape
+## tuning, so most rooms leave it null and never ask for it.
+@export var hazards: HazardConfig
 
 const ROOM_HEIGHT: float = 360.0
 const FLOOR_TOP: float = 320.0
@@ -16,11 +19,16 @@ const LADDER_WIDTH: float = 16.0
 ## A ladder overshoots the ledge it serves, so you climb above the surface and
 ## step onto it rather than stopping level with it and falling off.
 const LADDER_OVERSHOOT: float = 28.0
+## How much of a spike tooth is drawn as its lit point. Purely how it looks, so
+## it stays here rather than in `config/hazards.tres` with the numbers that
+## decide whether it kills you.
+const TIP_FRACTION: float = 0.6
 
 var _solids: Array[Rect2] = []
 var _ladders: Array[Rect2] = []
 var _woods: Array[Rect2] = []
 var _lavas: Array[Rect2] = []
+var _spike_beds: Array[Rect2] = []
 
 
 func _add_solid(rect: Rect2) -> StaticBody2D:
@@ -61,6 +69,33 @@ func _add_lava(rect: Rect2) -> Hazard:
 	var hazard := Hazard.new()
 	hazard.configure(rect.size)
 	hazard.position = rect.get_center()
+	add_child(hazard)
+	return hazard
+
+
+## A bed of spikes standing on the surface at `surface_y`, `count` teeth wide,
+## with its left-hand tooth starting at `x`.
+##
+## A room gives it a surface and a number of teeth rather than a rectangle,
+## because the rectangle is made of `config/hazards.tres` and a room that
+## carried its own pixel height would go stale the moment M14 retunes the teeth.
+##
+## What is drawn and what kills are not the same rectangle here, which is the
+## one thing about spikes worth being careful with. See `Spikes.lethal_box`.
+func _add_spikes(surface_y: float, x: float, count: int) -> Hazard:
+	if hazards == null:
+		# A bench copied without the resource would place an invisible box that
+		# kills, which is a worse bug than having no spikes at all.
+		push_error("bench: a spike bed needs config/hazards.tres wired into the scene")
+		return null
+	var bed := Spikes.bed_on(
+		surface_y, x, count, hazards.spike_tooth_pitch, hazards.spike_tooth_height
+	)
+	_spike_beds.append(bed)
+	var lethal := Spikes.lethal_box(bed, hazards.spike_tooth_pitch, hazards.spike_grace)
+	var hazard := Hazard.new()
+	hazard.configure(lethal.size)
+	hazard.position = lethal.get_center()
 	add_child(hazard)
 	return hazard
 
@@ -194,6 +229,7 @@ func _draw_bench(width: float) -> void:
 				Palette.LAVA_FISSURE, 2.0
 			)
 		draw_rect(Rect2(rect.position, Vector2(rect.size.x, 2.0)), Palette.LAVA_CORE)
+	_draw_spike_beds()
 	for rect in _ladders:
 		# Cold and matte, with gold rungs. ART_DIRECTION.md reserves warm and
 		# saturated for things that kill you, and a ladder is the opposite of
@@ -204,6 +240,25 @@ func _draw_bench(width: float) -> void:
 			var y := rect.position.y + 12.0 * float(i) + 6.0
 			draw_line(Vector2(rect.position.x, y), Vector2(rect.end.x, y), Palette.GOLD_FACE, 2.0)
 	_draw_ruler()
+
+
+## The teeth, tooth by tooth, with a lit point on each.
+##
+## ART_DIRECTION.md gives spikes a dark warm body and a bright tip, and the
+## reason the tip is a separate polygon rather than a line is that the point is
+## what the player is reading: a row of lit points says "do not land here" from
+## across the room, and a uniformly coloured triangle does not.
+func _draw_spike_beds() -> void:
+	for bed in _spike_beds:
+		for tooth in Spikes.teeth(bed, hazards.spike_tooth_pitch):
+			draw_colored_polygon(tooth, Palette.SPIKE_IRON)
+			var apex := tooth[1]
+			draw_colored_polygon(
+				PackedVector2Array([
+					tooth[0].lerp(apex, TIP_FRACTION), apex, tooth[2].lerp(apex, TIP_FRACTION)
+				]),
+				Palette.SPIKE_TIP
+			)
 
 
 ## A height scale against the left wall, because "did that clear a tier" should

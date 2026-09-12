@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="HazardConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://config/hazard_config.gd" id="1_hazard"]
+
+[resource]
+script = ExtResource("1_hazard")
+spike_tooth_height = 12.0
+spike_tooth_pitch = 8.0
+spike_grace = 3.0

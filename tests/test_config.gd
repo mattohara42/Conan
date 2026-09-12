@@ -7,6 +7,7 @@ const CLIMB := "res://config/movement.tres"
 const STRONG := "res://config/movement_strong.tres"
 const WORLD := "res://config/world.tres"
 const SWORD := "res://config/sword.tres"
+const HAZARDS := "res://config/hazards.tres"
 
 ## The two presets are a controlled experiment, so everything except the jump
 ## and the time it takes has to be identical between them.
@@ -22,6 +23,7 @@ func test_every_tuning_file_loads() -> void:
 	check(load(STRONG) is MovementConfig, "config/movement_strong.tres is a MovementConfig")
 	check(load(WORLD) is WorldConfig, "config/world.tres is a WorldConfig")
 	check(load(SWORD) is SwordConfig, "config/sword.tres is a SwordConfig")
+	check(load(HAZARDS) is HazardConfig, "config/hazards.tres is a HazardConfig")
 
 
 func test_no_tuning_number_is_nonsense() -> void:
@@ -144,3 +146,37 @@ func test_the_sword_count_is_the_difficulty_dial_and_it_is_small() -> void:
 func test_a_sword_is_one_tile_long() -> void:
 	var world: WorldConfig = load(WORLD)
 	check_eq(world.sword_length, world.tile_size, "sword length is one tile")
+
+
+## The spike numbers. The one that decides how the game feels is `spike_grace`,
+## and it is a forgiveness, so the only way it can be wrong in a way arithmetic
+## catches is by being large enough to walk through a bed.
+func test_the_spike_numbers_hold_together() -> void:
+	var hazards: HazardConfig = load(HAZARDS)
+	var world: WorldConfig = load(WORLD)
+	check(hazards.spike_tooth_height > 0.0, "a tooth stands off the surface")
+	check(hazards.spike_tooth_pitch > 0.0, "and the points are spaced apart")
+	check(
+		hazards.spike_tooth_height <= world.tile_size,
+		"a tooth is no taller than a tile, or a bed is terrain and not a hazard"
+	)
+	check(
+		hazards.spike_tooth_pitch < world.hero_width,
+		"at least two points sit under a standing hero, or a bed reads as a fence"
+	)
+	check(hazards.spike_grace >= 0.0, "the grace is forgiveness, never extra reach")
+	check(
+		hazards.spike_grace < hazards.spike_tooth_height,
+		"the grace is smaller than a tooth, or the bed has no killing box left"
+	)
+
+
+## The grace is forgiveness and most of a tooth still has to kill, or a bed
+## stops being a hazard and becomes a texture.
+func test_the_spike_grace_leaves_most_of_the_tooth_lethal() -> void:
+	var hazards: HazardConfig = load(HAZARDS)
+	var fraction := hazards.spike_grace / hazards.spike_tooth_height
+	check(
+		fraction < 0.34,
+		"the spike grace is %.0f%% of a tooth" % [fraction * 100.0]
+	)

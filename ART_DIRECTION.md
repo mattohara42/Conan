@@ -49,6 +49,13 @@ deep clotted red crust with orange fissures and a yellow-white core where it
 bubbles.
 `#6b1f14` crust, `#d94f1e` flow, `#ffb64a` fissure, `#fff0c2` core.
 
+**Spikes.** Iron, not rock. Warm and saturated, because the rule below says
+anything that can kill you is, but held clearly under lava at the bright end:
+lava is the one saturated thing in the game and a spike bed must not compete
+with it. A dark warm body with a lit point, and the row of points carries the
+reading before the hue does.
+`#7a2434` iron, `#e0956f` tip.
+
 **Electricity.** The only cool bright, and it belongs to Act 3 and to Volta.
 Cyan going to white, thin and hard-edged against everything else being soft.
 `#5fe0e8` arc, `#eafcff` core, `#2a6f8a` residue.

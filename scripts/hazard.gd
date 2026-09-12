@@ -10,10 +10,18 @@
 class_name Hazard
 extends Area2D
 
+## What it was configured with, kept only so a running build can say it. The
+## killing box is the one piece of a room that a screenshot cannot show, and a
+## spike bed's box is deliberately smaller than the teeth that are drawn, so
+## `tools/capture.gd` prints this and CLAUDE.md's "draw the thing you measured"
+## still holds. Nothing reads it to decide anything.
+var killing_box: Vector2 = Vector2.ZERO
+
 
 ## `size` is the whole killing box. The room owns where it goes and what it
 ## looks like: a hazard that drew itself would need to know it was lava.
 func configure(size: Vector2) -> void:
+	killing_box = size
 	var shape := CollisionShape2D.new()
 	var box := RectangleShape2D.new()
 	box.size = size

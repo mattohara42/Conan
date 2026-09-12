@@ -21,6 +21,14 @@ const LAVA_FLOW := Color("d94f1e")
 const LAVA_FISSURE := Color("ffb64a")
 const LAVA_CORE := Color("fff0c2")
 
+# Spikes. Warm and saturated because it kills you, but a good deal less
+# saturated than lava at the bright end: ART_DIRECTION.md calls lava the one
+# saturated thing in the game and iron catching firelight is not molten rock.
+# The silhouette does the rest of the work, since a row of points reads as a row
+# of points long before its hue does.
+const SPIKE_IRON := Color("7a2434")
+const SPIKE_TIP := Color("e0956f")
+
 # Electricity. Act 3 and Volta, and the only cool bright.
 const ARC := Color("5fe0e8")
 const ARC_CORE := Color("eafcff")
@@ -55,6 +63,8 @@ static func all() -> Dictionary:
 		"LAVA_FLOW": LAVA_FLOW,
 		"LAVA_FISSURE": LAVA_FISSURE,
 		"LAVA_CORE": LAVA_CORE,
+		"SPIKE_IRON": SPIKE_IRON,
+		"SPIKE_TIP": SPIKE_TIP,
 		"ARC": ARC,
 		"ARC_CORE": ARC_CORE,
 		"ARC_RESIDUE": ARC_RESIDUE,
