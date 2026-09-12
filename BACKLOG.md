@@ -59,19 +59,25 @@ committed to.
   M14, or delete it.
 
 - **The hero reaches into the room's mechanisms on a respawn.** Placing the
-  player at a checkpoint frees every sword in play and now resets every falling
-  platform, both by walking a group from inside `player.gd`. Two is cheaper than
-  the alternative and the lines are three deep. A third one means the room
-  should be listening for a signal the player emits, and the player should stop
-  knowing what a room contains. Raised while building the falling platforms and
+  player at a checkpoint frees every sword in play and resets every platform,
+  both by walking a group from inside `player.gd`. Two is cheaper than the
+  alternative and the lines are three deep. A third one means the room should be
+  listening for a signal the player emits, and the player should stop knowing
+  what a room contains. Raised while building the falling platforms and
   deliberately not fixed there.
+
+  The moving platforms made it slightly worse: the reset now also hands a
+  mechanism a number out of `config/death.tres`, because a free-running clock has
+  to sit out the respawn freeze. A signal carrying "the player has the controls
+  back" would say the same thing without the hero knowing either fact.
 
 - **A falling slab is drawn over the lava it sinks into.** A room paints itself
   before any of its children, so every mechanism paints over the lava rectangle
   and a slab on its way out crosses the surface rather than entering it. Grey
   box, and M9 replaces the rectangle with a shader and an emitter anyway, so the
   fix belongs there along with whatever a slab hitting molten rock should look
-  like.
+  like. A ferry's rail is the same thing standing still: it is drawn over the
+  moat it spans rather than into it.
 
 - **The older CI screenshot steps keep their log without reading it.** The two
   spike steps grep for the outcome they claim, so a bed that stops killing or

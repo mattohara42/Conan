@@ -234,18 +234,19 @@ class CaptureAgent:
 				])
 
 
-	## What every falling platform is doing, and where it is.
+	## What every platform is doing, and where it is.
 	##
-	## The one mechanism in M3 whose whole content is a clock. A screenshot of a
+	## The mechanisms in M3 whose whole content is a clock. A screenshot of a
 	## slab at home and a screenshot of a slab that is one frame from letting go
-	## are the same picture, and "steady" in this log after a run that stood on
-	## one is the bug this line exists to catch.
+	## are the same picture, and so are a ferry that is running and a ferry that
+	## is parked. "steady" in this log after a run that stood on a falling
+	## platform, or the same ferry position twice, is what this line catches.
 	func _report_platforms() -> void:
 		for node in get_tree().get_nodes_in_group("platforms"):
-			var platform := node as FallingPlatform
+			var platform := node as Platform
 			if platform != null:
 				print("capture: platform at %s %s" % [
-					platform.global_position, PlatformCycle.phase_name(platform.phase)
+					platform.global_position, platform.status()
 				])
 
 

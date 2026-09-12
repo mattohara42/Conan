@@ -91,3 +91,36 @@ func test_releasing_jump_cuts_a_rise_and_leaves_a_fall_alone() -> void:
 	check_near(Motion.damp_on_release(-400.0, 0.4), -160.0, 0.001, "a rise is cut")
 	check_eq(Motion.damp_on_release(300.0, 0.4), 300.0, "a fall is untouched")
 	check_eq(Motion.damp_on_release(0.0, 0.4), 0.0, "the apex is untouched")
+
+
+## The distance and the time have to agree, or a room designed against one and
+## played against the other is designed against nothing. Stepping the real
+## horizontal integrator is the only honest check of the closed form.
+func test_run_time_agrees_with_running() -> void:
+	var distance := 48.0
+	var stepped := 0.0
+	var velocity_x := 0.0
+	var elapsed := 0.0
+	while stepped < distance and elapsed < 5.0:
+		velocity_x = Motion.step_horizontal(velocity_x, 1.0, 1600.0, 2400.0, 200.0, DT)
+		stepped += velocity_x * DT
+		elapsed += DT
+	check_near(
+		Motion.run_time(distance, 200.0, 1600.0), elapsed, DT * 2.0,
+		"the closed form matches the integrator over %.0f px" % distance
+	)
+
+
+func test_run_time_holds_top_speed_once_it_has_it() -> void:
+	var ramp := Motion.run_up_distance(200.0, 1600.0)
+	var to_ramp := Motion.run_time(ramp, 200.0, 1600.0)
+	check_near(to_ramp, 200.0 / 1600.0, 0.001, "the ramp takes speed over acceleration")
+	check_near(
+		Motion.run_time(ramp + 200.0, 200.0, 1600.0), to_ramp + 1.0, 0.001,
+		"and every second after it is another top speed of floor"
+	)
+	check_eq(Motion.run_time(0.0, 200.0, 1600.0), 0.0, "going nowhere takes no time")
+	check_eq(
+		Motion.run_time(10.0, 200.0, 0.0), INF,
+		"and a mover that cannot accelerate never arrives"
+	)

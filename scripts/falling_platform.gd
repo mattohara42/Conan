@@ -4,11 +4,11 @@
 ## test can reach them. This script is the part that cannot be pure: it senses
 ## being stood on, it moves a body, and it draws.
 ##
-## `AnimatableBody2D` rather than `StaticBody2D`, because it is moved by code and
-## has to carry what is standing on it while it goes. That is the whole point of
-## the hazard: the floor leaves with you on it.
+## The body it is, and the fact that a respawn puts it back, are `Platform`:
+## those are what it has in common with the ferry in the next moat over. What is
+## its own is the sensing, the clock and the picture.
 class_name FallingPlatform
-extends AnimatableBody2D
+extends Platform
 
 ## How tall the strip that notices you is, in design px. It sits on the top
 ## surface, so a jump that clears the slab does not arm it and a foot that lands
@@ -19,32 +19,21 @@ const SENSOR_HEIGHT: float = 5.0
 ## with the numbers that decide whether you fall.
 const FAULT_FRACTION: float = 0.45
 
-var config: HazardConfig
 ## Read by the overlay and by `tools/capture.gd`. What it is doing now.
 var phase: PlatformCycle.Phase = PlatformCycle.Phase.STEADY
 
-var _size := Vector2.ZERO
-var _home := Vector2.ZERO
 ## How far it falls before it counts as out of the room. The room knows this and
 ## this script does not, because it depends on where the room put it.
 var _drop: float = 0.0
 ## Seconds since something stood on it, or -1 when nothing has.
 var _elapsed: float = -1.0
-var _shape: CollisionShape2D
 
 
 ## Built in code rather than handed a scene, like every other mechanism in the
 ## benches. `drop` is how far below home it has to get before it is gone.
 func configure(size: Vector2, drop: float, hazards: HazardConfig) -> void:
-	_size = size
 	_drop = drop
-	config = hazards
-	sync_to_physics = true
-	_shape = CollisionShape2D.new()
-	var box := RectangleShape2D.new()
-	box.size = size
-	_shape.shape = box
-	add_child(_shape)
+	_build(size, hazards)
 
 	# The strip that notices a foot. An Area2D rather than asking the player what
 	# it is standing on: the player owns no list of what it touches, and adding
@@ -66,11 +55,6 @@ func configure(size: Vector2, drop: float, hazards: HazardConfig) -> void:
 	sensor.monitorable = false
 	sensor.body_entered.connect(_on_body_entered)
 	add_child(sensor)
-	add_to_group("platforms")
-
-
-func _ready() -> void:
-	_home = position
 
 
 func _physics_process(delta: float) -> void:
@@ -106,13 +90,10 @@ func _on_body_entered(body: Node2D) -> void:
 	queue_redraw()
 
 
-## Back at home and load bearing, now, with no part of the cycle left to run.
-##
-## Called by the player on a respawn. M3's bargain is that a death costs you the
-## jump you missed and nothing else, and a route that is still missing two of
-## its steps when you get back there is a cost: it is the wait that turns dying
-## twenty times from annoying into tedious.
-func reset() -> void:
+## Back at home and load bearing, with no part of the cycle left to run. See
+## `Platform.reset` for why a respawn does this at all. Nothing here is running
+## until somebody stands on it, so there is no freeze to sit out.
+func reset(_frozen_for: float) -> void:
 	_elapsed = -1.0
 	phase = PlatformCycle.Phase.STEADY
 	if _shape != null:
@@ -124,6 +105,10 @@ func reset() -> void:
 func _rest() -> void:
 	_elapsed = -1.0
 	position = _home
+
+
+func status() -> String:
+	return PlatformCycle.phase_name(phase)
 
 
 ## Cold and matte, because ART_DIRECTION.md reserves warm and saturated for what

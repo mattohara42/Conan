@@ -121,6 +121,27 @@ func _add_falling_platform(rect: Rect2) -> FallingPlatform:
 	return platform
 
 
+## A ferry: a platform that crosses `travel` and comes back, on a clock that
+## started before the player did and has no trigger on it at all. `rect` is
+## where it sits at the near end of that trip, with its top face at
+## `rect.position.y`.
+##
+## The room owns where it goes and how far, for the same reason it owns a
+## falling platform's drop: both are facts about the moat, and `MovingPlatform`
+## knows what it does rather than where it is.
+func _add_moving_platform(rect: Rect2, travel: Vector2) -> MovingPlatform:
+	if hazards == null:
+		# A bench copied without the resource would place a slab with no clock
+		# in it, which reads as ordinary floor over a moat nobody can cross.
+		push_error("bench: a moving platform needs config/hazards.tres wired into the scene")
+		return null
+	var platform := MovingPlatform.new()
+	platform.configure(rect.size, travel, hazards)
+	platform.position = rect.get_center()
+	add_child(platform)
+	return platform
+
+
 ## A brazier standing on the floor at `base`, which is a point on a surface and
 ## not a rectangle: a brazier has no extent you can collide with, only a place
 ## it stands and a zone that notices you went past.

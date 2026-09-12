@@ -92,6 +92,25 @@ static func run_up_distance(run_speed: float, accel: float) -> float:
 	return (run_speed * run_speed) / (2.0 * accel)
 
 
+## How long it takes to cover `distance` from a standstill, accelerating at
+## `accel` until `run_speed` and then holding it.
+##
+## The companion to `run_up_distance`, and the number a room with a clock in it
+## is designed against: a checkpoint is placed well when you can get from it to
+## the thing you have to catch inside the window that thing is there for. INF
+## for a mover that cannot move, so a room asserting against it fails loudly
+## rather than reading as instant.
+static func run_time(distance: float, run_speed: float, accel: float) -> float:
+	if distance <= 0.0:
+		return 0.0
+	if run_speed <= 0.0 or accel <= 0.0:
+		return INF
+	var ramp := run_up_distance(run_speed, accel)
+	if distance <= ramp:
+		return sqrt(2.0 * distance / accel)
+	return run_speed / accel + (distance - ramp) / run_speed
+
+
 ## Releasing jump while still rising cuts the climb short. This is what makes
 ## jump height variable by hold duration without a second jump state.
 static func damp_on_release(velocity_y: float, damping: float) -> float:

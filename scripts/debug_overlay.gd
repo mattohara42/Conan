@@ -20,6 +20,7 @@ const BENCHES: PackedStringArray = [
 	"res://scenes/rooms/room_m3.tscn",
 	"res://scenes/rooms/room_m3_spikes.tscn",
 	"res://scenes/rooms/room_m3_falling.tscn",
+	"res://scenes/rooms/room_m3_moving.tscn",
 ]
 
 @onready var _panel: PanelContainer = $Panel
@@ -54,18 +55,19 @@ func _cycle_bench() -> void:
 	get_tree().change_scene_to_file(BENCHES[(index + 1) % BENCHES.size()])
 
 
-## What the falling platforms are doing. Their whole content is a clock, so
-## there is nothing to look at that says which of them is about to let go.
+## What the platforms are doing. Their whole content is a clock, so there is
+## nothing to look at that says which slab is about to let go, or how long a
+## ferry has been sitting at the dock you are running for.
 func _platforms_in_play() -> String:
 	var platforms := get_tree().get_nodes_in_group("platforms")
 	if platforms.is_empty():
 		return "no platforms here"
 	var counts := {}
 	for node in platforms:
-		var platform := node as FallingPlatform
+		var platform := node as Platform
 		if platform == null:
 			continue
-		var label := PlatformCycle.phase_name(platform.phase)
+		var label := platform.status()
 		counts[label] = int(counts.get(label, 0)) + 1
 	var parts: PackedStringArray = []
 	for label in counts:

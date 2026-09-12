@@ -10,11 +10,12 @@
 ## shape of its own to tune. Geysers will want a row of their own and they can
 ## be added when they exist.
 ##
-## A falling platform is not a hazard either, in the sense that it has no
-## killing box and never touches `Hazard`: it is the thing that drops you into
-## one. Its numbers are here because they are what a room full of hazards is
-## tuned against, and splitting them into a file of their own would put two
-## halves of the same decision in two places.
+## Platforms are not hazards either, in the sense that neither kind has a
+## killing box and neither ever touches `Hazard`: they are the things that put
+## you in one, or fail to keep you out of one. Their numbers are here because
+## they are what a room full of hazards is tuned against, and splitting them
+## into a file of their own would put two halves of the same decision in two
+## places.
 class_name HazardConfig
 extends Resource
 
@@ -60,3 +61,22 @@ extends Resource
 ## How fast that shake oscillates, in Hz. Fast enough to read as unstable rather
 ## than as something being moved on purpose.
 @export var platform_shake_hz: float = 16.0
+
+@export_group("Moving platforms")
+## How fast a ferry crosses, px/s. The number the hazard is made of: it decides
+## how long a moat is shut for, and therefore what missing the boat costs.
+##
+## Deliberately a little over half a run, so a ferry is plainly slower than you
+## are and catching one is never a chase. How long a crossing takes is derived
+## from this and the span the room gave it, because a travel time in here would
+## go stale the moment a room made a moat wider.
+@export var platform_travel_speed: float = 110.0
+## Seconds a ferry waits at each end before setting off again.
+##
+## This is the window you board in, and it is why a ferry docks rather than
+## turning round on the spot. It is set by the harder of the two boardings on the
+## M3 bench: a respawn has to be able to run at the ferry and jump onto it before
+## it leaves, and at half a second it could not. What a player who misses that
+## window waits is one trip out and one back, which is the number to keep an eye
+## on if this grows.
+@export var platform_wait_time: float = 0.7
