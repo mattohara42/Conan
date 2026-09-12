@@ -19,6 +19,7 @@ const BENCHES: PackedStringArray = [
 	"res://scenes/rooms/room_m2_switch.tscn",
 	"res://scenes/rooms/room_m3.tscn",
 	"res://scenes/rooms/room_m3_spikes.tscn",
+	"res://scenes/rooms/room_m3_falling.tscn",
 ]
 
 @onready var _panel: PanelContainer = $Panel
@@ -51,6 +52,25 @@ func _cycle_bench() -> void:
 	var here := get_tree().current_scene.scene_file_path
 	var index := BENCHES.find(here)
 	get_tree().change_scene_to_file(BENCHES[(index + 1) % BENCHES.size()])
+
+
+## What the falling platforms are doing. Their whole content is a clock, so
+## there is nothing to look at that says which of them is about to let go.
+func _platforms_in_play() -> String:
+	var platforms := get_tree().get_nodes_in_group("platforms")
+	if platforms.is_empty():
+		return "no platforms here"
+	var counts := {}
+	for node in platforms:
+		var platform := node as FallingPlatform
+		if platform == null:
+			continue
+		var label := PlatformCycle.phase_name(platform.phase)
+		counts[label] = int(counts.get(label, 0)) + 1
+	var parts: PackedStringArray = []
+	for label in counts:
+		parts.append("%d %s" % [counts[label], label])
+	return ", ".join(parts)
 
 
 ## What every sword on screen is doing, which is the whole instrument for M1.
@@ -117,6 +137,7 @@ func _process(_delta: float) -> void:
 		],
 		"last jump   %.0f px apex   %s" % [_player.peak_height, cleared],
 		"swords      %d held   %s" % [_player.swords_held, _swords_in_play()],
+		"platforms   %s" % _platforms_in_play(),
 		"checkpoint  %.0f, %.0f   %s" % [
 			_player.spawn_point.x, _player.spawn_point.y, _braziers_lit()
 		],
