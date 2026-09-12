@@ -147,6 +147,53 @@ jobs:
           grep -q "capture: no deaths" cleared.log || {
             echo "the marginal bed killed a run that should have cleared it"; exit 1; }
 
+      # A falling platform's whole content is a clock, and a clock is the one
+      # thing a screenshot cannot show: a slab at home and a slab one frame from
+      # letting go are the same picture. These two steps read the log for the
+      # phase each slab is in, which is the only way to tell a platform that
+      # works from a platform that is decoration.
+      #
+      # This one runs onto the first slab and then stands still on it, which is
+      # the mistake the hazard exists to punish. The slab has to let go, carry
+      # the player into the lava, and then be back at home by the time the
+      # respawn hands the controls over: a route still missing two of its steps
+      # when you get back to it is the wait that makes dying twenty times
+      # tedious, and M3's done-when is about exactly that.
+      - name: Stand on a falling platform, and ride it in
+        run: |
+          xvfb-run -a ~/godot/godot --path . --resolution 1280x720 \
+            --script res://tools/capture.gd -- \
+            --scene=res://scenes/rooms/room_m3_falling.tscn \
+            --out=room_m3_falling.png \
+            --input="move_right:60;move_right,jump:16;jump:120" \
+            --zoom=1.2 --centre=380,290 --overwrite \
+            > falling.log 2>&1 || { cat falling.log; exit 1; }
+          cat falling.log
+          grep -qE "capture: [1-9][0-9]* death" falling.log || {
+            echo "standing still on a falling platform did not kill anybody"; exit 1; }
+          if grep -qE "capture: platform .*(shaking|falling|gone)" falling.log; then
+            echo "a platform was still missing after the respawn"; exit 1
+          fi
+          echo "every platform was back at home when the controls came back"
+
+      # And the other half: the room is crossable. Four jumps per moat, taken on
+      # the rhythm a player would use, which is to leave a slab as soon as they
+      # land on it. A death here means the slabs stopped holding long enough to
+      # be crossed, and the bench stopped measuring the death loop and started
+      # measuring frustration with the room.
+      - name: Cross both moats without stopping
+        run: |
+          xvfb-run -a ~/godot/godot --path . --resolution 1280x720 \
+            --script res://tools/capture.gd -- \
+            --scene=res://scenes/rooms/room_m3_falling.tscn \
+            --out=room_m3_falling_crossed.png \
+            --input="move_right:58;move_right,jump:16;move_right:12;move_right,jump:16;move_right:12;move_right,jump:16;move_right:29;move_right,jump:16;move_right:12;move_right,jump:16;move_right:12;move_right,jump:16;move_right:12;move_right,jump:16;move_right:24" \
+            --zoom=1.2 --centre=880,290 --overwrite \
+            > crossed.log 2>&1 || { cat crossed.log; exit 1; }
+          cat crossed.log
+          grep -q "capture: no deaths" crossed.log || {
+            echo "the crossing killed a run that should have made it"; exit 1; }
+
       - name: Keep the screenshots
         uses: actions/upload-artifact@v4
         with:
@@ -160,3 +207,5 @@ jobs:
             room_m3_brazier.png
             room_m3_spikes.png
             room_m3_spikes_cleared.png
+            room_m3_falling.png
+            room_m3_falling_crossed.png

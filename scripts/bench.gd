@@ -100,6 +100,27 @@ func _add_spikes(surface_y: float, x: float, count: int) -> Hazard:
 	return hazard
 
 
+## A platform that lets go once you stand on it, with its top face at
+## `rect.position.y`. It falls until it is out of the room and then comes back.
+##
+## The room owns where it is and how far it has to fall, because both are facts
+## about the room: `FallingPlatform` knows what it does and not where it is.
+func _add_falling_platform(rect: Rect2) -> FallingPlatform:
+	if hazards == null:
+		# A bench copied without the resource would place a slab with no clock
+		# in it, which reads as ordinary floor and is a worse bug than no
+		# platform at all.
+		push_error("bench: a falling platform needs config/hazards.tres wired into the scene")
+		return null
+	var platform := FallingPlatform.new()
+	# Far enough to be below the room, plus its own depth so nothing is left
+	# poking up into the gap it used to fill.
+	platform.configure(rect.size, ROOM_HEIGHT - rect.position.y + rect.size.y, hazards)
+	platform.position = rect.get_center()
+	add_child(platform)
+	return platform
+
+
 ## A brazier standing on the floor at `base`, which is a point on a surface and
 ## not a rectangle: a brazier has no extent you can collide with, only a place
 ## it stands and a zone that notices you went past.

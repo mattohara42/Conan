@@ -58,6 +58,21 @@ committed to.
   work or it is a number for its own sake, and only playing tells them apart.
   M14, or delete it.
 
+- **The hero reaches into the room's mechanisms on a respawn.** Placing the
+  player at a checkpoint frees every sword in play and now resets every falling
+  platform, both by walking a group from inside `player.gd`. Two is cheaper than
+  the alternative and the lines are three deep. A third one means the room
+  should be listening for a signal the player emits, and the player should stop
+  knowing what a room contains. Raised while building the falling platforms and
+  deliberately not fixed there.
+
+- **A falling slab is drawn over the lava it sinks into.** A room paints itself
+  before any of its children, so every mechanism paints over the lava rectangle
+  and a slab on its way out crosses the surface rather than entering it. Grey
+  box, and M9 replaces the rectangle with a shader and an emitter anyway, so the
+  fix belongs there along with whatever a slab hitting molten rock should look
+  like.
+
 - **The older CI screenshot steps keep their log without reading it.** The two
   spike steps grep for the outcome they claim, so a bed that stops killing or
   stops being jumpable fails the build. The lava, brazier, sword and gate steps

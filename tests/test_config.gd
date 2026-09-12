@@ -180,3 +180,47 @@ func test_the_spike_grace_leaves_most_of_the_tooth_lethal() -> void:
 		fraction < 0.34,
 		"the spike grace is %.0f%% of a tooth" % [fraction * 100.0]
 	)
+
+
+## The falling platform's numbers. Every one of them is a duration or a tremor,
+## and the two claims worth asserting are that a slab warns you before it goes
+## and that it goes gently enough to be jumped off.
+func test_the_falling_platform_numbers_hold_together() -> void:
+	var hazards: HazardConfig = load(HAZARDS)
+	var climb: MovementConfig = load(CLIMB)
+	var world: WorldConfig = load(WORLD)
+	check(hazards.platform_warn_time > 0.0, "a platform warns you before it goes")
+	check(hazards.platform_fall_gravity > 0.0, "and then it actually falls")
+	check(hazards.platform_return_time >= 0.0, "and comes back, or stays gone")
+	var hero_falls := (
+		Motion.gravity_for(climb.jump_height, climb.time_to_apex)
+		* climb.fall_gravity_multiplier
+	)
+	check(
+		hazards.platform_fall_gravity < hero_falls,
+		"a slab falls at %.0f px/s^2 against the hero's %.0f, so it sinks away from"
+		% [hazards.platform_fall_gravity, hero_falls]
+		+ " under you rather than snapping out of frame"
+	)
+	check(
+		hazards.platform_shake > 0.0 and hazards.platform_shake < world.hero_width * 0.25,
+		"the warning is a tremor and not a wobble"
+	)
+	check(
+		hazards.platform_shake_hz > 4.0,
+		"and it oscillates fast enough to read as unstable rather than as moving"
+	)
+
+
+## The warning has to be a thing a person can act on. Under the whole of the
+## jump buffer it would be a warning you cannot answer even with the input
+## already in, which is the 1984 complaint SPEC.md exists to throw away.
+func test_the_platform_warning_outlasts_the_forgiveness_windows() -> void:
+	var hazards: HazardConfig = load(HAZARDS)
+	var climb: MovementConfig = load(CLIMB)
+	check(
+		hazards.platform_warn_time > climb.jump_buffer_time + climb.coyote_time,
+		"the %.2f s warning outlasts the %.2f s of buffer and coyote time it has to"
+		% [hazards.platform_warn_time, climb.jump_buffer_time + climb.coyote_time]
+		+ " be answered through"
+	)

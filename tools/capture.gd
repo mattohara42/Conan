@@ -154,6 +154,7 @@ class CaptureAgent:
 		_report_swords()
 		_report_braziers()
 		_report_hazards()
+		_report_platforms()
 		_report_mechanisms()
 
 		await RenderingServer.frame_post_draw
@@ -230,6 +231,21 @@ class CaptureAgent:
 			if hazard != null:
 				print("capture: hazard at %s, killing box %s" % [
 					hazard.global_position, hazard.killing_box
+				])
+
+
+	## What every falling platform is doing, and where it is.
+	##
+	## The one mechanism in M3 whose whole content is a clock. A screenshot of a
+	## slab at home and a screenshot of a slab that is one frame from letting go
+	## are the same picture, and "steady" in this log after a run that stood on
+	## one is the bug this line exists to catch.
+	func _report_platforms() -> void:
+		for node in get_tree().get_nodes_in_group("platforms"):
+			var platform := node as FallingPlatform
+			if platform != null:
+				print("capture: platform at %s %s" % [
+					platform.global_position, PlatformCycle.phase_name(platform.phase)
 				])
 
 
