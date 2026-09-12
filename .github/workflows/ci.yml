@@ -110,6 +110,43 @@ jobs:
             --input="move_right:86;move_right,jump:20;move_right:120;-:45" \
             --zoom=1.0 --centre=470,250 --overwrite
 
+      # Spikes are the one hazard whose drawing and whose killing box are
+      # different rectangles, and a screenshot can only show the first. This
+      # runs the player into the easy bed, so the log carries both boxes and
+      # says the teeth killed somebody, and the picture says they look like
+      # teeth. Either half alone has been wrong before.
+      #
+      # These two steps check the log rather than only keeping it, because a
+      # bed that quietly stopped killing and a bed that quietly stopped being
+      # jumpable both draw a perfectly good picture. The older steps above
+      # still only keep theirs, which is in BACKLOG.md.
+      - name: Screenshot the spikes, and die on them
+        run: |
+          xvfb-run -a ~/godot/godot --path . --resolution 1280x720 \
+            --script res://tools/capture.gd -- \
+            --scene=res://scenes/rooms/room_m3_spikes.tscn --out=room_m3_spikes.png \
+            --input="move_right:80;-:60" --zoom=1.0 --centre=300,250 --overwrite \
+            > spikes.log 2>&1 || { cat spikes.log; exit 1; }
+          cat spikes.log
+          grep -qE "capture: [1-9][0-9]* death" spikes.log || {
+            echo "walking into the spikes did not kill anybody"; exit 1; }
+
+      # And the other half: the marginal bed is meant to be jumpable. This run
+      # clears it, which is the claim tests/test_room_m3_spikes.gd makes as
+      # arithmetic. A death here means the bed got wider than the jump.
+      - name: Jump the marginal bed
+        run: |
+          xvfb-run -a ~/godot/godot --path . --resolution 1280x720 \
+            --script res://tools/capture.gd -- \
+            --scene=res://scenes/rooms/room_m3_spikes.tscn \
+            --out=room_m3_spikes_cleared.png \
+            --input="move_right:62;move_right,jump:20;move_right:84;move_right,jump:20;move_right:40" \
+            --zoom=1.0 --centre=650,250 --overwrite \
+            > cleared.log 2>&1 || { cat cleared.log; exit 1; }
+          cat cleared.log
+          grep -q "capture: no deaths" cleared.log || {
+            echo "the marginal bed killed a run that should have cleared it"; exit 1; }
+
       - name: Keep the screenshots
         uses: actions/upload-artifact@v4
         with:
@@ -121,3 +158,5 @@ jobs:
             room_m2_switch.png
             room_m3.png
             room_m3_brazier.png
+            room_m3_spikes.png
+            room_m3_spikes_cleared.png

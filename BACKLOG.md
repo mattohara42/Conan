@@ -38,6 +38,37 @@ committed to.
   `SPEC.md` warns it might be. If it is, this is the fix. If it is not, ladders
   and geysers are enough.
 
+- **Spikes where lava cannot go**, which is the only reason to have both. A bed
+  bolts to any surface, so the interesting placement is teeth on top of the ledge
+  you have to land on: the landing becomes the puzzle and there is no gap to
+  read. M3's spike bench does not do this, because the arithmetic says it cannot.
+  A 32 px step with a five-tooth bed on it needs the jump to stay above 41 px for
+  50 px of travel, and the 56 px jump manages 47.2, leaving a takeoff window of
+  two or three frames. That is the 1984 complaint `SPEC.md` exists to throw away.
+
+  It wants a moving platform to arrive on, or a sword ledge, not a wider bed.
+  Revisit when the rest of M3's hazards exist. If M14 ever raises the jump this
+  becomes possible, and it is a reason to check rather than a reason to raise it.
+
+- **`spike_grace` may be a dial nobody can feel.** It holds the killing box 3 px
+  below the points so a jump that brushes them lives. Setting it to zero and
+  re-sweeping the M3 spike bench moved the takeoff window by nothing at all: the
+  only approach it can affect is a jump arc crossing a bed near its apex, and
+  nothing else meets a bed slowly from above. Either it is doing invisible good
+  work or it is a number for its own sake, and only playing tells them apart.
+  M14, or delete it.
+
+- **The older CI screenshot steps keep their log without reading it.** The two
+  spike steps grep for the outcome they claim, so a bed that stops killing or
+  stops being jumpable fails the build. The lava, brazier, sword and gate steps
+  predate that and only upload the picture, so the same class of regression is
+  caught only if somebody looks. Cheap to retrofit, and it was left alone on
+  purpose rather than widening a spikes change.
+
+- **CI writes its screenshots to the repo root and `.gitignore` does not cover
+  them.** Noticed while adding the spike steps. A local run of the same command
+  leaves untracked PNGs sitting in `git status`. One line in `.gitignore`.
+
 - **The avian ally as a mid-game traversal tool** rather than only the ending.
   Risk: it is a second verb, and the game is about having one.
 - **Two kinds of switch: floor plates and wall switches.** A plate you stand on,
